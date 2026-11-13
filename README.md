@@ -3,7 +3,7 @@
 সরকারি চাকরি প্রস্তুতি — বন্ধুদের জন্য অ্যাপ।
 
 - User app: `/` — Register/Login (mobile+password), Study Timer, Leaderboard, PDF Room (Docs), Books, Profile
-- Admin app: `/admin` — Login `admin` / `1234` (Render env `ADMIN_USER` / `ADMIN_PASS` দিয়ে বদলাও), Notice post, Book add, Document add, Friend add/remove
+- Admin app: `/admin` — Login Render env `ADMIN_USER` / `ADMIN_PASS` দিয়ে সেট করা (GitHub-এ পাসওয়ার্ড রাখা হয় না)
 
 ## Database — Turso
 Tables: `users`, `notices`, `books`, `docs` — server.js চালু হলেই auto-create হয়।

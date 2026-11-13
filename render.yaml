@@ -10,6 +10,6 @@ services:
       - key: TURSO_AUTH_TOKEN
         sync: false
       - key: ADMIN_USER
-        value: admin
+        sync: false
       - key: ADMIN_PASS
-        value: "1234"
+        sync: false
