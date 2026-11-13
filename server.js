@@ -216,6 +216,34 @@ app.get('/api/pdfs/:id/file', async (req, res) => {
   } catch (e) { console.error(e); res.status(500).send('সার্ভার সমস্যা হয়েছে!'); }
 });
 
+// ---- Admin manage: list notices + delete notices/books/docs/pdfs ----
+app.get('/api/notices', async (req, res) => {
+  try {
+    const r = await db.execute('SELECT id, text FROM notices ORDER BY id DESC');
+    res.json({ notices: r.rows.map(x => ({ id: x.id, text: x.text })) });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/notices/:id', async (req, res) => {
+  try { await db.execute({ sql: 'DELETE FROM notices WHERE id = ?', args: [req.params.id] }); res.json({ ok: true }); }
+  catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/books/:id', async (req, res) => {
+  try { await db.execute({ sql: 'DELETE FROM books WHERE id = ?', args: [req.params.id] }); res.json({ ok: true }); }
+  catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/docs/:id', async (req, res) => {
+  try { await db.execute({ sql: 'DELETE FROM docs WHERE id = ?', args: [req.params.id] }); res.json({ ok: true }); }
+  catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/pdfs/:id', async (req, res) => {
+  try { await db.execute({ sql: 'DELETE FROM pdf_files WHERE id = ?', args: [req.params.id] }); res.json({ ok: true }); }
+  catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
 // ---- Admin: users list / remove ----
 app.get('/api/admin/users', async (req, res) => {
   try {
