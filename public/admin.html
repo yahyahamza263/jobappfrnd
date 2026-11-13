@@ -41,7 +41,7 @@
         @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(46px,36px) scale(1.14); } }
 
         .hidden { display: none !important; }
-        .container { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 0 16px 48px; min-height: 100vh; }
+        .container { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 0 16px 120px; min-height: 100vh; }
 
         /* ---- hero header ---- */
         header {
@@ -191,25 +191,12 @@
         .empty-note { text-align: center; color: var(--muted); padding: 18px 0; }
 
 
-        /* ---- tab bar (section-wise) ---- */
-        .tabbar {
-            position: sticky; top: 0; z-index: 5;
-            display: flex; gap: 8px; overflow-x: auto;
-            padding: 10px 4px; margin-top: 10px;
-            background: rgba(11,14,26,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-radius: 18px; scrollbar-width: none;
-        }
-        .tabbar::-webkit-scrollbar { display: none; }
-        .tab-btn {
-            flex: 1; min-width: 0; width: auto; margin-top: 0;
-            white-space: nowrap; border: 1px solid var(--card-border);
-            background: rgba(0,0,0,.35); color: var(--muted);
-            border-radius: 999px; padding: 10px 6px; font-size: 13.5px; font-weight: 800;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #c8f542, #9dc72e); color: #131602;
-            border-color: transparent; box-shadow: 0 4px 16px rgba(200,245,66,.35);
-        }
+        /* ---- bottom nav (normal user app er moto) ---- */
+        .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; display: flex; background: rgba(11,14,26,.88); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid rgba(255,255,255,.1); padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); }
+        .nav-btn { flex: 1; min-width: 0; background: none; border: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; font-size: 20px; padding: 6px 0; font-family: inherit; }
+        .nav-btn label { font-size: 11px; font-weight: 700; }
+        .nav-btn.active { color: var(--lime); }
+        @media (min-width: 600px) { .bottomnav { max-width: 560px; margin: 0 auto; border-radius: 24px 24px 0 0; } }
         .admin-section { animation: rise .4s ease both; }
         .list-title { font-size: 16px; font-weight: 800; margin: 22px 4px 2px; }
         .list-sub { font-size: 12.5px; color: var(--muted); margin: 0 4px 2px; }
@@ -262,14 +249,6 @@
             <h3 class="section-title">👋 স্বাগতম, এডমিন!</h3>
             <p class="section-sub">একটা সেকশন বেছে নিন — যোগ করুন, দেখুন, মুছে ফেলুন।</p>
 
-            <div class="tabbar">
-                <button class="tab-btn active" data-sec="notice" onclick="showSection('notice', this)">📢 নোটিশ</button>
-                <button class="tab-btn" data-sec="books" onclick="showSection('books', this)">📚 বই</button>
-                <button class="tab-btn" data-sec="pdfs" onclick="showSection('pdfs', this)">📄 পিডিএফ</button>
-                <button class="tab-btn" data-sec="docs" onclick="showSection('docs', this)">📃 ডকুমেন্ট</button>
-                <button class="tab-btn" data-sec="users" onclick="showSection('users', this)">👥 বন্ধু</button>
-            </div>
-
             <!-- NOTICE -->
             <div class="admin-section" id="sec-notice">
                 <div class="card accent-violet">
@@ -296,6 +275,15 @@
                     <input type="text" id="book-author" placeholder="লেখক বা প্রকাশনী">
                     <input type="text" id="book-link" placeholder="বইয়ের PDF বা Google Drive লিংক">
                     <button class="btn-gold" onclick="addBook()">বই যোগ করুন</button>
+                    <div style="border-top:1px solid rgba(255,255,255,.09); margin-top:16px; padding-top:14px;">
+                        <p style="font-size:13px; color:var(--muted); margin:0 0 4px;">অথবা ফাইল থেকে PDF দিয়ে বই যোগ করুন</p>
+                        <label class="file-picker" for="book-pdf-file" style="border-color:rgba(255,211,77,.55); background:rgba(255,211,77,.07);">📄 পিডিএফ ফাইল বেছে নিন</label>
+                        <input type="file" id="book-pdf-file" accept="application/pdf" class="hidden">
+                        <div class="file-name" id="book-pdf-file-name"></div>
+                        <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF — নাম আর লেখক উপরের ঘরেই লিখুন</p>
+                        <button class="btn-gold" onclick="uploadBookPdf()">📤 PDF ফাইল দিয়ে বই যোগ করুন</button>
+                        <div class="upload-status" id="book-pdf-status"></div>
+                    </div>
                 </div>
                 <h4 class="list-title">📚 বইয়ের তালিকা</h4>
                 <p class="list-sub">লাইব্রেরিতে থাকা সব বই।</p>
@@ -332,6 +320,15 @@
                     <input type="text" id="admin-doc-title" placeholder="ডকুমেন্টের নাম">
                     <input type="text" id="admin-doc-link" placeholder="PDF বা Drive লিংক">
                     <button class="btn-cyan" onclick="addAdminDoc()">ডকুমেন্ট যোগ করুন</button>
+                    <div style="border-top:1px solid rgba(255,255,255,.09); margin-top:16px; padding-top:14px;">
+                        <p style="font-size:13px; color:var(--muted); margin:0 0 4px;">অথবা ফাইল থেকে PDF দিয়ে ডকুমেন্ট যোগ করুন</p>
+                        <label class="file-picker" for="doc-pdf-file" style="border-color:rgba(34,211,238,.55); background:rgba(34,211,238,.07);">📄 পিডিএফ ফাইল বেছে নিন</label>
+                        <input type="file" id="doc-pdf-file" accept="application/pdf" class="hidden">
+                        <div class="file-name" id="doc-pdf-file-name"></div>
+                        <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF — নাম উপরের ঘরেই লিখুন</p>
+                        <button class="btn-cyan" onclick="uploadDocPdf()">📤 PDF ফাইল দিয়ে ডকুমেন্ট যোগ করুন</button>
+                        <div class="upload-status" id="doc-pdf-status"></div>
+                    </div>
                 </div>
                 <h4 class="list-title">📃 ডকুমেন্টের তালিকা</h4>
                 <p class="list-sub">লিংক দিয়ে যোগ করা ডকুমেন্ট।</p>
@@ -361,6 +358,15 @@
     </div>
 </div>
 
+<!-- Bottom Navigation (normal user app er moto) -->
+<div id="admin-bottom-nav" class="bottomnav hidden">
+    <button class="nav-btn active" data-sec="notice" onclick="showSection('notice', this)"><span>📢</span><label>নোটিশ</label></button>
+    <button class="nav-btn" data-sec="books" onclick="showSection('books', this)"><span>📚</span><label>বই</label></button>
+    <button class="nav-btn" data-sec="pdfs" onclick="showSection('pdfs', this)"><span>📄</span><label>পিডিএফ</label></button>
+    <button class="nav-btn" data-sec="docs" onclick="showSection('docs', this)"><span>📃</span><label>ডকুমেন্ট</label></button>
+    <button class="nav-btn" data-sec="users" onclick="showSection('users', this)"><span>👥</span><label>বন্ধু</label></button>
+</div>
+
 <script>
     async function api(path, method, body) {
         const r = await fetch(path, { method: method || 'GET', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
@@ -377,6 +383,7 @@
             try{ localStorage.setItem('jobappfrnd_admin', '1'); }catch(e){}
             document.getElementById('admin-login-box').classList.add('hidden');
             document.getElementById('admin-dashboard').classList.remove('hidden');
+            document.getElementById('admin-bottom-nav').classList.remove('hidden');
             document.getElementById('admin-subtitle').innerText = 'কন্ট্রোল প্যানেল — স্বাগতম, এডমিন!';
             loadAdminUsers();
             loadAdminContent();
@@ -386,6 +393,7 @@
     function adminLogout() {
         try{ localStorage.removeItem('jobappfrnd_admin'); }catch(e){}
         document.getElementById('admin-dashboard').classList.add('hidden');
+        document.getElementById('admin-bottom-nav').classList.add('hidden');
         document.getElementById('admin-login-box').classList.remove('hidden');
         document.getElementById('admin-subtitle').innerText = 'সরকারি চাকরি প্রস্তুতি — কন্ট্রোল প্যানেল';
     }
@@ -465,6 +473,92 @@
         }
     }
 
+    // Book + Doc file picker: show chosen file name
+    document.getElementById('book-pdf-file').addEventListener('change', function() {
+        let f = this.files && this.files[0];
+        document.getElementById('book-pdf-file-name').innerText = f ? '📄 ' + f.name : '';
+    });
+    document.getElementById('doc-pdf-file').addEventListener('change', function() {
+        let f = this.files && this.files[0];
+        document.getElementById('doc-pdf-file-name').innerText = f ? '📄 ' + f.name : '';
+    });
+
+    function validPdfFile(file){
+        if(!file) return 'আগে একটি পিডিএফ ফাইল বেছে নিন!';
+        if(file.type && file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) return 'শুধু PDF ফাইল আপলোড করা যাবে!';
+        if(file.size > 10 * 1024 * 1024) return 'ফাইলটি ১০ MB-এর বেশি — ছোট ফাইল দিন!';
+        return null;
+    }
+
+    async function uploadPdfToTurso(title, file){
+        let fd = new FormData();
+        fd.append('title', title);
+        fd.append('addedBy', 'Admin');
+        fd.append('file', file);
+        const r = await fetch('/api/pdfs', { method: 'POST', body: fd });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error || 'আপলোড হয়নি!');
+        return d.pdf;
+    }
+
+    // বই: PDF ফাইল আপলোড → তারপর বইয়ের লিংক হিসেবে Turso ফাইল যোগ
+    async function uploadBookPdf() {
+        let status = document.getElementById('book-pdf-status');
+        let title = document.getElementById('book-title').value.trim();
+        let author = document.getElementById('book-author').value.trim();
+        let fileInput = document.getElementById('book-pdf-file');
+        let file = fileInput.files && fileInput.files[0];
+        status.className = 'upload-status';
+        if(!title) { status.innerText = 'আগে বইয়ের নাম লিখুন!'; status.classList.add('err'); return; }
+        let ferr = validPdfFile(file);
+        if(ferr) { status.innerText = ferr; status.classList.add('err'); return; }
+        status.innerText = 'আপলোড হচ্ছে…';
+        status.classList.add('busy');
+        try {
+            let pdf = await uploadPdfToTurso(title, file);
+            let link = location.origin + '/api/pdfs/' + pdf.id + '/file';
+            await api('/api/books', 'POST', { title, author: author || 'সাধারণ', link });
+            status.innerText = '✅ বই সফলভাবে যোগ হয়েছে!';
+            status.className = 'upload-status ok';
+            document.getElementById('book-title').value = '';
+            document.getElementById('book-author').value = '';
+            fileInput.value = '';
+            document.getElementById('book-pdf-file-name').innerText = '';
+            loadAdminContent();
+        } catch(e) {
+            status.innerText = '❌ ' + (e.message || 'আপলোড হয়নি! আবার চেষ্টা করুন।');
+            status.className = 'upload-status err';
+        }
+    }
+
+    // ডকুমেন্ট: PDF ফাইল আপলোড → তারপর ডকুমেন্টের লিংক হিসেবে Turso ফাইল যোগ
+    async function uploadDocPdf() {
+        let status = document.getElementById('doc-pdf-status');
+        let title = document.getElementById('admin-doc-title').value.trim();
+        let fileInput = document.getElementById('doc-pdf-file');
+        let file = fileInput.files && fileInput.files[0];
+        status.className = 'upload-status';
+        if(!title) { status.innerText = 'আগে ডকুমেন্টের নাম লিখুন!'; status.classList.add('err'); return; }
+        let ferr = validPdfFile(file);
+        if(ferr) { status.innerText = ferr; status.classList.add('err'); return; }
+        status.innerText = 'আপলোড হচ্ছে…';
+        status.classList.add('busy');
+        try {
+            let pdf = await uploadPdfToTurso(title, file);
+            let link = location.origin + '/api/pdfs/' + pdf.id + '/file';
+            await api('/api/docs', 'POST', { title, link, addedBy: 'Admin' });
+            status.innerText = '✅ ডকুমেন্ট সফলভাবে যোগ হয়েছে!';
+            status.className = 'upload-status ok';
+            document.getElementById('admin-doc-title').value = '';
+            fileInput.value = '';
+            document.getElementById('doc-pdf-file-name').innerText = '';
+            loadAdminContent();
+        } catch(e) {
+            status.innerText = '❌ ' + (e.message || 'আপলোড হয়নি! আবার চেষ্টা করুন।');
+            status.className = 'upload-status err';
+        }
+    }
+
     async function addNewUser() {
         let name = document.getElementById('new-u-name').value.trim();
         let mobile = document.getElementById('new-u-mobile').value.trim();
@@ -513,9 +607,9 @@
     function showSection(name, btn){
         document.querySelectorAll('.admin-section').forEach(el=>el.classList.add('hidden'));
         document.getElementById('sec-' + name).classList.remove('hidden');
-        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-        else { let b = document.querySelector('.tab-btn[data-sec="' + name + '"]'); if(b) b.classList.add('active'); }
+        else { let b = document.querySelector('.nav-btn[data-sec="' + name + '"]'); if(b) b.classList.add('active'); }
         loadAdminContent();
     }
 
@@ -546,7 +640,7 @@
         // Notices (id সহ — /api/notices থেকে; না পেলে /api/data থেকে শুধু দেখাবে)
         let nl = document.getElementById('notice-list');
         let notices = null;
-        try{ notices = await api('/api/notices'); }catch(e){ notices = null; }
+        try{ let nr = await api('/api/notices'); notices = nr.notices || null; }catch(e){ notices = null; }
         if(Array.isArray(notices)){
             nl.innerHTML = notices.length ? '' : '<p class="empty-note">কোনো নোটিশ পোস্ট করা হয়নি।</p>';
             notices.forEach(n=>{
@@ -598,6 +692,7 @@
         if(!ok) return;
         document.getElementById('admin-login-box').classList.add('hidden');
         document.getElementById('admin-dashboard').classList.remove('hidden');
+        document.getElementById('admin-bottom-nav').classList.remove('hidden');
         document.getElementById('admin-subtitle').innerText = 'কন্ট্রোল প্যানেল — স্বাগতম, এডমিন!';
         loadAdminUsers();
         loadAdminContent();

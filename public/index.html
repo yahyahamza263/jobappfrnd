@@ -435,7 +435,15 @@ async function uploadPdf(){
   }catch(e){ status.innerText = '❌ ' + e.message; toast(e.message); }
 }
 function openPdfReader(title, link){
-  let embedLink = link.replace('/view?usp=sharing','/preview').replace('/view','/preview');
+  let embedLink;
+  if(link.includes('/api/pdfs/')){
+    // Upload kora file (book/document) — WebView e sorasori PDF khole na, tai Viewer diye
+    const abs = link.startsWith('http') ? link : location.origin + link;
+    embedLink = 'https://docs.google.com/gview?embedded=1&url=' + encodeURIComponent(abs);
+  } else {
+    // Google Drive view link -> preview link
+    embedLink = link.replace('/view?usp=sharing','/preview').replace('/view','/preview');
+  }
   document.getElementById('reader-title').innerText = 'পড়ছো: ' + title;
   document.getElementById('pdf-frame').src = embedLink;
   document.getElementById('pdf-reader-box').classList.remove('hidden');
