@@ -1,0 +1,1 @@
+{"dependencies":{"@libsql/client":"^0.18.0","express":"4.21.2"},"description":"JobAppFrnd - Sarkari chakri prostuti app for friends. User + Admin, Turso database.","engines":{"node":">=18"},"main":"server.js","name":"jobappfrnd","scripts":{"start":"node server.js"},"version":"1.0.0"}
