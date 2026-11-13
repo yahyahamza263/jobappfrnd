@@ -442,8 +442,11 @@ function openPdfReader(title, link){
   document.getElementById('pdf-reader-box').scrollIntoView({behavior:'smooth'});
 }
 function openPdfFile(id, title){
+  // Android WebView er iframe e sorasori PDF khole na (WebView er nijer PDF viewer nei) —
+  // tai Google Docs Viewer diye khola hocche, eta WebView + browser — duijaygatei chole।
+  const fileUrl = location.origin + '/api/pdfs/' + id + '/file';
   document.getElementById('reader-title').innerText = 'পড়ছো: ' + title;
-  document.getElementById('pdf-frame').src = '/api/pdfs/' + id + '/file';
+  document.getElementById('pdf-frame').src = 'https://docs.google.com/gview?embedded=1&url=' + encodeURIComponent(fileUrl);
   document.getElementById('pdf-reader-box').classList.remove('hidden');
   document.getElementById('pdf-reader-box').scrollIntoView({behavior:'smooth'});
 }
