@@ -1,298 +1,488 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobAppFrnd - সরকারি চাকরি প্রস্তুতি</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: #333; }
-        .container { max-width: 480px; margin: auto; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        header { background: #007bff; color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; }
-        .content { padding: 15px; flex: 1; overflow-y: auto; }
-        .hidden { display: none !important; }
-        input, select { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
-        button:hover { background: #0056b3; }
-        .card { background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #007bff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .nav-tabs { display: flex; background: #e9ecef; border-top: 1px solid #ddd; position: sticky; bottom: 0; }
-        .nav-tabs button { flex: 1; background: none; color: #495057; border: none; padding: 10px 4px; margin: 0; border-radius: 0; font-size: 0.8rem; font-weight: bold; }
-        .nav-tabs button.active { background: #007bff; color: white; }
-        .timer-display { font-size: 2.3rem; text-align: center; margin: 15px 0; font-weight: bold; color: #28a745; }
-        .rank-badge { background: #ffc107; color: #000; padding: 2px 8px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; float: right; }
-        iframe { width: 100%; height: 350px; border: 1px solid #ccc; border-radius: 5px; margin-top: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>JobAppFrnd — সরকারি চাকরি প্রস্তুতি</title>
+<meta name="theme-color" content="#0b0e1a">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hind Siliguri","Noto Sans Bengali",sans-serif;background:#0b0e1a;color:#f2f4ff;min-height:100vh;padding-bottom:96px;overflow-x:hidden}
+.hidden{display:none!important}
+.bg-orbs{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35}
+.o1{width:340px;height:340px;background:#5b4bff;top:-90px;left:-90px;animation:drift 14s ease-in-out infinite alternate}
+.o2{width:280px;height:280px;background:#0fbf8f;bottom:6%;right:-80px;animation:drift 18s ease-in-out infinite alternate-reverse}
+.o3{width:220px;height:220px;background:#ff5e8a;top:38%;left:60%;opacity:.16;animation:drift 16s ease-in-out infinite alternate}
+.o4{width:180px;height:180px;background:#ffb020;top:70%;left:-40px;opacity:.14;animation:drift 20s ease-in-out infinite alternate-reverse}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(46px,36px) scale(1.15)}}
+.screen{max-width:560px;margin:0 auto;padding:0 16px}
+.card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:18px;margin:14px 0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.35);animation:rise .45s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.btn{border:none;border-radius:14px;padding:13px 18px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:transform .08s ease,filter .15s ease;margin-top:10px;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,#c8f542,#a4d92e);color:#131602;box-shadow:0 6px 22px rgba(200,245,66,.35)}
+.btn.blue{background:linear-gradient(135deg,#4f8cff,#7b5cff);color:#fff;box-shadow:0 6px 22px rgba(99,102,241,.45)}
+.btn.green{background:linear-gradient(135deg,#22c55e,#0fbf8f);color:#fff;box-shadow:0 6px 22px rgba(34,197,94,.4)}
+.btn.red{background:linear-gradient(135deg,#ff5e6c,#e5484d);color:#fff;box-shadow:0 6px 22px rgba(229,72,77,.4)}
+.btn.violet{background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#fff;box-shadow:0 6px 22px rgba(139,92,246,.45)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.16);color:#f2f4ff}
+.btn.sm{width:auto;padding:9px 16px;font-size:13px;margin-top:6px}
+input,select,textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:13px 14px;color:#f2f4ff;font-size:16px;margin-top:10px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid #8b7bff;border-color:transparent}
+select option{background:#141a36;color:#f2f4ff}
+.field-label{display:block;font-size:12px;font-weight:700;color:#9aa0c3;margin:12px 0 -4px;letter-spacing:.5px}
+.muted{color:#9aa0c3}
+.tiny{font-size:12px}
+.center{text-align:center}
+.auth-wrap{padding:52px 4px 40px;text-align:center}
+.logo-big{font-size:64px;animation:floaty 2.6s ease-in-out infinite;filter:drop-shadow(0 0 26px rgba(200,245,66,.55))}
+@keyframes floaty{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.08)}}
+.brand{font-size:38px;margin:8px 0 2px;letter-spacing:-1px;background:linear-gradient(90deg,#c8f542,#4f8cff,#ff5e8a,#ffb020,#c8f542);background-size:300% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:300% center}}
+.tagline{color:#9aa0c3;margin:0 0 22px}
+.seg{display:inline-flex;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:4px;margin-bottom:6px}
+.seg-btn{border:none;background:transparent;color:#9aa0c3;font-weight:700;padding:9px 22px;border-radius:999px;cursor:pointer;font-size:14px;font-family:inherit}
+.seg-btn.active{background:#c8f542;color:#131602;box-shadow:0 4px 16px rgba(200,245,66,.4)}
+.auth-card{text-align:left}
+.auth-card h2{margin:0 0 6px}
+.link{color:#7dd3fc;cursor:pointer;text-decoration:underline}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 4px 6px}
+.me{display:flex;gap:10px;align-items:center}
+.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#5b4bff,#ff5e8a);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:2px solid rgba(255,255,255,.16);color:#fff}
+.me-name{font-weight:800;font-size:16px}
+.me-sub{font-size:12px;color:#9aa0c3}
+.rank-pill{background:linear-gradient(135deg,#2a3358,#1a2040);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 14px;font-weight:800;color:#c8f542}
+.hero{border-radius:22px;padding:20px;margin:14px 0;background:linear-gradient(135deg,rgba(91,75,255,.35),rgba(255,94,138,.22),rgba(15,191,143,.18));border:1px solid rgba(139,123,255,.4);animation:rise .45s ease both}
+.hero h2{margin:0;font-size:21px}
+.hero p{margin:6px 0 0;color:#dbe1ff;font-size:14px;line-height:1.6}
+.notice{border-radius:14px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.6;background:linear-gradient(135deg,rgba(139,123,255,.2),rgba(200,245,66,.1));border:1px solid rgba(139,123,255,.4);animation:rise .4s ease both}
+.notice.empty{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.09);color:#9aa0c3}
+.sect{margin:20px 4px 8px;font-size:17px;font-weight:800}
+.sect small{display:block;font-size:12px;color:#9aa0c3;font-weight:600;margin-top:2px}
+.timer-card{text-align:center}
+.timer-ring{position:relative;width:220px;height:220px;margin:6px auto}
+.timer-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:12}
+.ring-fg{fill:none;stroke:#c8f542;stroke-width:12;stroke-linecap:round;stroke-dasharray:553;stroke-dashoffset:553;transition:stroke-dashoffset 1s linear;filter:drop-shadow(0 0 8px rgba(200,245,66,.7))}
+.timer-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#timer-text{font-size:34px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums}
+.timer-btns{display:flex;gap:10px;margin-top:8px}
+.timer-btns .btn{margin-top:0}
+.goal-note{font-size:13px;color:#9aa0c3;margin-top:10px}
+.stats3{display:flex;justify-content:space-around;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09)}
+.stats3 b{display:block;font-size:20px;color:#c8f542}
+.stats3 span{font-size:12px;color:#9aa0c3}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:20px 0 6px;min-height:190px}
+.podium-card{text-align:center;width:30%;position:relative;animation:rise .5s ease both}
+.podium-card.first{width:36%}
+.podium .medal{font-size:30px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
+.podium-card.first .medal{font-size:40px}
+.podium .p-avatar{width:64px;height:64px;margin:6px auto;font-size:28px;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a3358,#141a36);color:#fff}
+.podium-card.first .p-avatar{width:84px;height:84px;font-size:36px}
+.ring-gold{border:3px solid #ffd34d;box-shadow:0 0 24px rgba(255,211,77,.55)}
+.ring-silver{border:3px solid #cfd6ea;box-shadow:0 0 18px rgba(207,214,234,.4)}
+.ring-bronze{border:3px solid #f0a35e;box-shadow:0 0 18px rgba(240,163,94,.4)}
+.podium .p-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.podium-card.first .p-name{font-size:17px}
+.podium .p-time{font-weight:800;color:#c8f542;font-size:15px;margin-top:2px}
+.podium .crown{position:absolute;top:-26px;left:50%;transform:translateX(-50%) rotate(-12deg);font-size:30px;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) rotate(-12deg) translateY(0)}50%{transform:translateX(-50%) rotate(-12deg) translateY(-6px)}}
+.board-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:12px 14px;animation:rise .4s ease both}
+.row.me-row{border-color:rgba(200,245,66,.6);background:rgba(200,245,66,.08)}
+.row .rank{font-weight:800;width:30px;text-align:center;color:#9aa0c3;font-size:15px}
+.row .avatar{width:44px;height:44px;font-size:20px}
+.row .who{flex:1;min-width:0}
+.row .who .n{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .who .c{font-size:12px;color:#9aa0c3}
+.row .t{text-align:right}
+.row .t .f{font-weight:800;color:#c8f542;font-size:16px}
+.row .t .s{font-size:11px;color:#9aa0c3}
+.doc-card{border-left:4px solid #22d3ee}
+.book-card{border-left:4px solid #a78bfa}
+.doc-card h4,.book-card h4{margin:0 0 4px;font-size:16px}
+.doc-card small,.book-card small{color:#9aa0c3}
+.file-row{display:flex;gap:8px;align-items:center}
+.upload-prog{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:10px}
+.upload-prog i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#22d3ee,#a78bfa);border-radius:99px;transition:width .3s}
+.reader-box{border-left:4px solid #ff5e6c}
+.reader-box iframe{width:100%;height:380px;border:1px solid rgba(255,255,255,.14);border-radius:12px;margin-top:10px;background:#fff}
+.chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;margin-top:6px}
+.chip.pdf{background:rgba(34,211,238,.16);color:#67e8f9}
+.chip.link{background:rgba(167,139,250,.16);color:#c4b5fd}
+.chip.book{background:rgba(255,176,32,.16);color:#fcd34d}
+.profile-hero{text-align:center;margin-top:16px}
+.p-avatar-big{font-size:44px;font-weight:800;width:96px;height:96px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,#5b4bff,#ff5e8a);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.16);color:#fff}
+.kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:15px}
+.kv:last-child{border-bottom:none}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;background:rgba(11,14,26,.88);backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.1);padding:8px 6px calc(10px + env(safe-area-inset-bottom))}
+.nav-btn{flex:1;min-width:0;background:none;border:none;color:#9aa0c3;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:20px;padding:6px 0;font-family:inherit}
+.nav-btn label{font-size:11px;font-weight:700}
+.nav-btn.active{color:#c8f542}
+.nav-play{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#c8f542,#a4d92e);color:#131602;display:flex;align-items:center;justify-content:center;font-size:20px;margin-top:-26px;box-shadow:0 8px 24px rgba(200,245,66,.45);border:4px solid #0b0e1a}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1c233f;border:1px solid rgba(255,255,255,.14);padding:12px 20px;border-radius:14px;z-index:200;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center;animation:rise .25s ease}
+@media (min-width:600px){.bottomnav{max-width:560px;margin:0 auto;border-radius:24px 24px 0 0}}
+</style>
 </head>
 <body>
+<div class="bg-orbs"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><span class="orb o4"></span></div>
 
-<div class="container">
-    <header id="user-header">JobAppFrnd - ইউজার লগইন / রেজিস্ট্রেশন</header>
-
-    <div class="content">
-        <!-- Auth Box -->
-        <div id="auth-section">
-            <div id="login-box">
-                <h3>বন্ধুদের লগইন</h3>
-                <input type="text" id="user-login-mobile" placeholder="মোবাইল নাম্বার">
-                <input type="password" id="user-login-pass" placeholder="পাসওয়ার্ড">
-                <button onclick="userLogin()">লগইন</button>
-                <p style="text-align: center; margin-top: 15px;">একাউন্ট নেই? <a href="#" onclick="toggleAuth(true)" style="color: #007bff;">রেজিস্ট্রেশন করুন</a></p>
-            </div>
-
-            <div id="reg-box" class="hidden">
-                <h3>নতুন একাউন্ট তৈরি</h3>
-                <input type="text" id="user-reg-name" placeholder="আপনার নাম">
-                <input type="text" id="user-reg-mobile" placeholder="মোবাইল নাম্বার">
-                <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড">
-                <button onclick="userRegister()">রেজিস্ট্রেশন</button>
-                <p style="text-align: center; margin-top: 15px;">আগেই একাউন্ট আছে? <a href="#" onclick="toggleAuth(false)" style="color: #007bff;">লগইন করুন</a></p>
-            </div>
-        </div>
-
-        <!-- User Dashboard -->
-        <div id="user-dashboard" class="hidden">
-            <div id="user-tab-content">
-                
-                <!-- 1. HOME & TIMER -->
-                <div class="user-sub-tab" id="ustub-home">
-                    <h4>📢 এডমিনের নোটিশ ও আইডিয়া</h4>
-                    <div id="user-notice-board"><div class="card">কোনো নোটিশ নেই।</div></div>
-
-                    <h4 style="margin-top: 15px;">⏱️ পড়ার টাইমার</h4>
-                    <div class="timer-display" id="timer-text">০০:০০:০০</div>
-                    <button id="start-btn" onclick="startTimer()" style="background: #28a745;">পড়া শুরু করুন (Start)</button>
-                    <button id="stop-btn" onclick="stopTimer()" class="hidden" style="background: #dc3545;">পড়া থামান ও সেভ করুন (Stop)</button>
-                    
-                    <div class="card" style="margin-top: 15px;">
-                        <strong>সারাজীবনের মোট পড়া:</strong>
-                        <p id="lifetime-study" style="font-size: 1.1rem; font-weight: bold; color: #007bff; margin: 5px 0 0 0;">০ মিনিট</p>
-                    </div>
-                </div>
-
-                <!-- 2. LEADERBOARD -->
-                <div class="user-sub-tab hidden" id="ustub-rank">
-                    <h3>🏆 বন্ধুদের লিডারবোর্ড</h3>
-                    <p style="font-size: 0.85rem; color: #666;">সর্বমোট পড়ার সময়ের ভিত্তিতে র‍্যাংকিং</p>
-                    <div id="leaderboard-list"></div>
-                </div>
-
-                <!-- 3. DOCUMENTS & PDF READER ROOM -->
-                <div class="user-sub-tab hidden" id="ustub-docs">
-                    <h3>📄 ডকুমেন্টস ও পিডিএফ পড়ার ঘর</h3>
-                    
-                    <div class="card" style="border-left-color: #28a745;">
-                        <strong>নতুন ডকুমেন্ট যোগ করুন</strong>
-                        <input type="text" id="doc-title" placeholder="ডকুমেন্টের নাম (যেমন: আবেদন কপি)">
-                        <input type="text" id="doc-link" placeholder="Google Drive বা PDF লিংক দিন">
-                        <button onclick="addUserDoc()" style="background: #28a745;">ডকুমেন্ট সেভ করুন</button>
-                    </div>
-
-                    <div id="pdf-reader-box" class="hidden card" style="border-left-color: #dc3545;">
-                        <strong id="reader-title">পিডিএফ রিডার</strong>
-                        <button onclick="closeReader()" style="background: #dc3545; padding: 5px; width: auto; float: right; margin: 0;">বন্ধ করুন ✖</button>
-                        <iframe id="pdf-frame" src=""></iframe>
-                    </div>
-
-                    <div id="docs-list"></div>
-                </div>
-
-                <!-- 4. BOOKS LIBRARY -->
-                <div class="user-sub-tab hidden" id="ustub-books">
-                    <h3>📚 গুরুত্বপূর্ণ বইয়ের তালিকা</h3>
-                    <div id="books-list"></div>
-                </div>
-
-                <!-- 5. PROFILE -->
-                <div class="user-sub-tab hidden" id="ustub-profile">
-                    <h3>👤 প্রোফাইল</h3>
-                    <div class="card">
-                        <p><strong>নাম:</strong> <span id="p-name"></span></p>
-                        <p><strong>মোবাইল:</strong> <span id="p-mobile"></span></p>
-                    </div>
-                    <button onclick="userLogout()" style="background: #dc3545; margin-top: 20px;">লগআউট</button>
-                </div>
-
-            </div>
-        </div>
+<div id="auth-section" class="screen">
+  <div class="auth-wrap">
+    <div class="logo-big">📚</div>
+    <h1 class="brand">JobAppFrnd</h1>
+    <p class="tagline">সরকারি চাকরির প্রস্তুতি — বন্ধুরা একসাথে 🔥</p>
+    <div class="seg">
+      <button class="seg-btn active" id="seg-login" onclick="toggleAuth(false)">লগইন</button>
+      <button class="seg-btn" id="seg-reg" onclick="toggleAuth(true)">রেজিস্ট্রেশন</button>
     </div>
-
-    <!-- Bottom Navigation -->
-    <div id="bottom-nav" class="nav-tabs hidden">
-        <button class="active" onclick="switchTab('home', this)">হোম</button>
-        <button onclick="switchTab('rank', this)">লিডারবোর্ড</button>
-        <button onclick="switchTab('docs', this)">পিডিএফ ঘর</button>
-        <button onclick="switchTab('books', this)">বইসমূহ</button>
-        <button onclick="switchTab('profile', this)">প্রোফাইল</button>
+    <div class="card auth-card" id="login-box">
+      <h2>স্বাগতম 👋</h2>
+      <p class="muted">মোবাইল নম্বর আর পাসওয়ার্ড দিয়ে লগইন করো।</p>
+      <input type="text" id="user-login-mobile" placeholder="মোবাইল নম্বর" inputmode="numeric">
+      <input type="password" id="user-login-pass" placeholder="পাসওয়ার্ড">
+      <button class="btn primary" onclick="userLogin()">লগইন 🚀</button>
+      <p class="tiny muted center" style="margin-top:14px">অ্যাকাউন্ট নেই? <span class="link" onclick="toggleAuth(true)">রেজিস্ট্রেশন করো</span></p>
     </div>
+    <div class="card auth-card hidden" id="reg-box">
+      <h2>নতুন অ্যাকাউন্ট ✨</h2>
+      <p class="muted">নাম, মোবাইল আর পাসওয়ার্ড দিলেই হয়ে যাবে।</p>
+      <input type="text" id="user-reg-name" placeholder="তোমার নাম">
+      <input type="text" id="user-reg-mobile" placeholder="মোবাইল নম্বর" inputmode="numeric">
+      <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড">
+      <button class="btn primary" onclick="userRegister()">অ্যাকাউন্ট তৈরি করো 🎉</button>
+      <p class="tiny muted center" style="margin-top:14px">আগেই অ্যাকাউন্ট আছে? <span class="link" onclick="toggleAuth(false)">লগইন করো</span></p>
+    </div>
+  </div>
+</div>
+
+<div id="user-dashboard" class="screen hidden">
+  <header class="topbar">
+    <div class="me">
+      <div class="avatar" id="me-avatar">J</div>
+      <div><div class="me-name" id="me-name">—</div><div class="me-sub">সরকারি চাকরি প্রস্তুতি 🎯</div></div>
+    </div>
+    <div class="rank-pill" id="me-rank-pill">—</div>
+  </header>
+
+  <div class="user-sub-tab" id="ustub-home">
+    <div class="hero">
+      <h2>📢 এডমিনের নোটিশ</h2>
+      <p>নতুন সার্কুলার, আইডিয়া আর গুরুত্বপূর্ণ খবর এখানেই পাবে।</p>
+    </div>
+    <div id="user-notice-board"><div class="notice empty">কোনো নোটিশ নেই।</div></div>
+
+    <h3 class="sect">⏱️ পড়ার টাইমার<small>পড়া শুরু করো — সময় জমবে, র‍্যাংক বাড়বে</small></h3>
+    <div class="card timer-card">
+      <div class="timer-ring">
+        <svg viewBox="0 0 200 200"><circle class="ring-bg" cx="100" cy="100" r="88"/><circle class="ring-fg" id="ring-fg" cx="100" cy="100" r="88"/></svg>
+        <div class="timer-text"><div id="timer-text">০০:০০:০০</div><div class="muted tiny" id="ring-label">আজকের লক্ষ্য: ৩০ মিনিট</div></div>
+      </div>
+      <div class="timer-btns">
+        <button class="btn green" id="start-btn" onclick="startTimer()">▶️ পড়া শুরু করো</button>
+        <button class="btn red hidden" id="stop-btn" onclick="stopTimer()">⏹️ থামাও ও সেভ করো</button>
+      </div>
+      <p class="goal-note">⏰ টাইমার চলার সময় ফোনের স্ক্রিন জ্বলে থাকবে, যাতে সময় না হারায়।</p>
+      <div class="stats3">
+        <div><b id="stat-hours">০ ঘণ্টা</b><span>মোট পড়া</span></div>
+        <div><b id="stat-mins">০ মিনিট</b><span>এই সেশনে</span></div>
+        <div><b id="stat-rank">#—</b><span>তোমার র‍্যাংক</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="user-sub-tab hidden" id="ustub-rank">
+    <h3 class="sect">🏆 বন্ধুদের লিডারবোর্ড<small>সবচেয়ে বেশি পড়েছে যারা — সর্বমোট সময়ের ভিত্তিতে</small></h3>
+    <div id="podium"></div>
+    <div id="leaderboard-list" class="board-list"></div>
+  </div>
+
+  <div class="user-sub-tab hidden" id="ustub-docs">
+    <h3 class="sect">📄 পিডিএফ পড়ার ঘর<small>ফাইল আপলোড করো বা লিংক যোগ করো — অ্যাপের ভেতরেই পড়ো</small></h3>
+    <div class="card" style="border-left:4px solid #22d3ee">
+      <h4 style="margin:0">📤 পিডিএফ ফাইল আপলোড করো</h4>
+      <p class="muted tiny" style="margin:6px 0 0">ফোন থেকে সরাসরি PDF বেছে নাও — সবার কাছে পৌঁছে যাবে। সর্বোচ্চ ১০ MB।</p>
+      <input type="text" id="pdf-title" placeholder="পিডিএফের নাম (যেমন: বাংলা ব্যাকরণ নোট)">
+      <div class="file-row"><input type="file" id="pdf-file" accept="application/pdf"></div>
+      <div class="upload-prog hidden" id="upload-prog"><i id="upload-fill"></i></div>
+      <p class="tiny muted hidden" id="upload-status"></p>
+      <button class="btn blue" onclick="uploadPdf()">⬆️ আপলোড করো</button>
+    </div>
+    <div class="card" style="border-left:4px solid #22c55e">
+      <h4 style="margin:0">🔗 লিংক দিয়ে ডকুমেন্ট যোগ করো</h4>
+      <p class="muted tiny" style="margin:6px 0 0">Google Drive বা যেকোনো PDF লিংক দিলেই হবে।</p>
+      <input type="text" id="doc-title" placeholder="ডকুমেন্টের নাম (যেমন: আবেদন কপি)">
+      <input type="text" id="doc-link" placeholder="Google Drive বা PDF লিংক দাও">
+      <button class="btn green" onclick="addUserDoc()">💾 ডকুমেন্ট সেভ করো</button>
+    </div>
+    <div id="pdf-reader-box" class="card reader-box hidden">
+      <strong id="reader-title">পিডিএফ রিডার</strong>
+      <button class="btn red sm" style="float:right;margin:0" onclick="closeReader()">বন্ধ করো ✖</button>
+      <iframe id="pdf-frame" src=""></iframe>
+    </div>
+    <div id="docs-list"></div>
+  </div>
+
+  <div class="user-sub-tab hidden" id="ustub-books">
+    <h3 class="sect">📚 গুরুত্বপূর্ণ বইয়ের তালিকা<small>অ্যাডমিনের দেওয়া বই — এক ক্লিকেই পড়া শুরু</small></h3>
+    <div id="books-list"></div>
+  </div>
+
+  <div class="user-sub-tab hidden" id="ustub-profile">
+    <h3 class="sect">👤 প্রোফাইল</h3>
+    <div class="card profile-hero">
+      <div class="p-avatar-big" id="p-avatar">J</div>
+      <h2 id="p-name" style="margin:12px 0 2px">—</h2>
+      <p class="muted" style="margin:0">JobAppFrnd পরিবারের সদস্য 🌟</p>
+    </div>
+    <div class="card">
+      <div class="kv"><span class="muted">📱 মোবাইল</span><b id="p-mobile">—</b></div>
+      <div class="kv"><span class="muted">⏱️ মোট পড়া</span><b id="p-total">—</b></div>
+      <div class="kv"><span class="muted">🏆 র‍্যাংক</span><b id="p-rank">—</b></div>
+    </div>
+    <button class="btn red" onclick="userLogout()">🚪 লগআউট</button>
+  </div>
+</div>
+
+<div id="bottom-nav" class="bottomnav hidden">
+  <button class="nav-btn active" onclick="switchTab('home', this)"><span>🏠</span><label>হোম</label></button>
+  <button class="nav-btn" onclick="switchTab('rank', this)"><span>🏆</span><label>লিডারবোর্ড</label></button>
+  <button class="nav-btn" onclick="switchTab('docs', this)"><span class="nav-play">📄</span><label>পিডিএফ ঘর</label></button>
+  <button class="nav-btn" onclick="switchTab('books', this)"><span>📚</span><label>বইসমূহ</label></button>
+  <button class="nav-btn" onclick="switchTab('profile', this)"><span>👤</span><label>প্রোফাইল</label></button>
 </div>
 
 <script>
-    let currentUser = null;
-    let timerInterval = null;
-    let secondsElapsed = 0;
-
-    async function api(path, method, body) {
-        const r = await fetch(path, { method: method || 'GET', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(d.error || 'Server error');
-        return d;
-    }
-
-    function toggleAuth(isReg) {
-        document.getElementById('login-box').classList.toggle('hidden', isReg);
-        document.getElementById('reg-box').classList.toggle('hidden', !isReg);
-    }
-
-    async function userRegister() {
-        let name = document.getElementById('user-reg-name').value.trim();
-        let mobile = document.getElementById('user-reg-mobile').value.trim();
-        let pass = document.getElementById('user-reg-pass').value.trim();
-        if(!name || !mobile || !pass) { alert('সবগুলো ঘর পূরণ করুন!'); return; }
-        try { await api('/api/register', 'POST', { name, mobile, pass }); alert('রেজিস্ট্রেশন সফল! এখন লগইন করুন।'); toggleAuth(false); }
-        catch(e) { alert(e.message); }
-    }
-
-    async function userLogin() {
-        let mobile = document.getElementById('user-login-mobile').value.trim();
-        let pass = document.getElementById('user-login-pass').value.trim();
-        try {
-            const d = await api('/api/login', 'POST', { mobile, pass });
-            currentUser = d.user;
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('user-dashboard').classList.remove('hidden');
-            document.getElementById('bottom-nav').classList.remove('hidden');
-            document.getElementById('user-header').innerText = 'স্বাগতম, ' + currentUser.name;
-            document.getElementById('p-name').innerText = currentUser.name;
-            document.getElementById('p-mobile').innerText = currentUser.mobile;
-            updateTimeDisplay();
-            loadAllData();
-        } catch(e) { alert('মোবাইল নাম্বার বা পাসওয়ার্ড ভুল অথবা এডমিন আপনাকে রিমুভ করেছেন!'); }
-    }
-
-    function userLogout() {
-        currentUser = null;
-        document.getElementById('user-dashboard').classList.add('hidden');
-        document.getElementById('bottom-nav').classList.add('hidden');
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('user-header').innerText = 'JobAppFrnd - ইউজার লগইন / রেজিস্ট্রেশন';
-    }
-
-    function switchTab(tab, btn) {
-        document.querySelectorAll('.user-sub-tab').forEach(el => el.classList.add('hidden'));
-        document.getElementById('ustub-' + tab).classList.remove('hidden');
-        btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadAllData();
-    }
-
-    function startTimer() {
-        document.getElementById('start-btn').classList.add('hidden');
-        document.getElementById('stop-btn').classList.remove('hidden');
-        secondsElapsed = 0;
-        timerInterval = setInterval(() => {
-            secondsElapsed++;
-            let h = Math.floor(secondsElapsed / 3600);
-            let m = Math.floor((secondsElapsed % 3600) / 60);
-            let s = secondsElapsed % 60;
-            document.getElementById('timer-text').innerText =
-                String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-        }, 1000);
-    }
-
-    async function stopTimer() {
-        clearInterval(timerInterval);
-        document.getElementById('stop-btn').classList.add('hidden');
-        document.getElementById('start-btn').classList.remove('hidden');
-        if(secondsElapsed > 0 && currentUser) {
-            try {
-                const d = await api('/api/study/add', 'POST', { mobile: currentUser.mobile, seconds: secondsElapsed });
-                currentUser = d.user;
-                updateTimeDisplay();
-                alert('পড়ার সময় সফলভাবে সেভ হয়েছে!');
-            } catch(e) { alert('সেভ হয়নি: ' + e.message); }
-        }
-        secondsElapsed = 0;
-        document.getElementById('timer-text').innerText = "০০:০০:০০";
-    }
-
-    function updateTimeDisplay() {
-        let totalSecs = currentUser.studySeconds || 0;
-        let mins = Math.floor(totalSecs / 60);
-        let hrs = Math.floor(mins / 60);
-        let remMins = mins % 60;
-        document.getElementById('lifetime-study').innerText = hrs + " ঘণ্টা " + remMins + " মিনিট (" + totalSecs + " সেকেন্ড)";
-    }
-
-    async function addUserDoc() {
-        let title = document.getElementById('doc-title').value.trim();
-        let link = document.getElementById('doc-link').value.trim();
-        if(!title || !link) { alert('নাম ও লিংক দিন!'); return; }
-        try {
-            await api('/api/docs', 'POST', { title, link, addedBy: currentUser.name });
-            document.getElementById('doc-title').value = '';
-            document.getElementById('doc-link').value = '';
-            loadAllData();
-            alert('ডকুমেন্ট যুক্ত হয়েছে!');
-        } catch(e) { alert(e.message); }
-    }
-
-    function openPdfReader(title, link) {
-        let embedLink = link.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
-        document.getElementById('reader-title').innerText = 'পড়ছেন: ' + title;
-        document.getElementById('pdf-frame').src = embedLink;
-        document.getElementById('pdf-reader-box').classList.remove('hidden');
-    }
-
-    function closeReader() {
-        document.getElementById('pdf-reader-box').classList.add('hidden');
-        document.getElementById('pdf-frame').src = '';
-    }
-
-    function esc(s){ return String(s).replace(/'/g, "\'").replace(/"/g, '&quot;'); }
-
-    async function loadAllData() {
-        let d;
-        try { d = await api('/api/data'); } catch(e) { return; }
-        let notices = d.notices || [];
-        let board = document.getElementById('user-notice-board');
-        board.innerHTML = notices.length ? '' : '<div class="card">কোনো নোটিশ নেই।</div>';
-        notices.forEach(n => board.innerHTML += `<div class="card">📢 ${n}</div>`);
-        let users = d.users || [];
-        let rankDiv = document.getElementById('leaderboard-list');
-        rankDiv.innerHTML = '';
-        users.forEach((u, i) => {
-            let mins = Math.floor((u.studySeconds || 0) / 60);
-            let hrs = Math.floor(mins / 60);
-            let remMins = mins % 60;
-            rankDiv.innerHTML += `
-                <div class="card">
-                    <span class="rank-badge">#${i + 1}</span>
-                    <strong>${u.name}</strong><br>
-                    <small>মোট পড়া: ${hrs} ঘণ্টা ${remMins} মিনিট (${u.studySeconds || 0} সেকেন্ড)</small>
-                </div>`;
-        });
-        let docs = d.docs || [];
-        let docsDiv = document.getElementById('docs-list');
-        docsDiv.innerHTML = docs.length ? '' : '<p>কোনো ডকুমেন্ট যোগ করা হয়নি।</p>';
-        docs.forEach(dd => {
-            docsDiv.innerHTML += `
-                <div class="card">
-                    <strong>📄 ${dd.title}</strong><br>
-                    <small>যোগ করেছেন: ${dd.addedBy}</small>
-                    <button onclick="openPdfReader('${esc(dd.title)}', '${esc(dd.link)}')" style="background: #17a2b8; padding: 6px;">অ্যাপের ভেতরে পড়ুন 📖</button>
-                </div>`;
-        });
-        let books = d.books || [];
-        let booksDiv = document.getElementById('books-list');
-        booksDiv.innerHTML = books.length ? '' : '<p>এডমিন এখনো কোনো বই যোগ করেননি।</p>';
-        books.forEach(b => {
-            booksDiv.innerHTML += `
-                <div class="card" style="border-left-color: #6f42c1;">
-                    <strong>📚 ${b.title}</strong><br>
-                    <small>লেখক/বিষয়: ${b.author}</small>
-                    <button onclick="openPdfReader('${esc(b.title)}', '${esc(b.link)}'); switchTab('docs', document.querySelectorAll('#bottom-nav button')[2]);" style="background: #6f42c1; padding: 6px;">বইটি পড়ুন 📖</button>
-                </div>`;
-        });
-    }
+let currentUser = null;
+let timerInterval = null;
+let secondsElapsed = 0;
+let allUsers = [];
+function toast(msg){
+  const old = document.querySelector('.toast'); if(old) old.remove();
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2600);
+}
+async function api(path, method, body){
+  const r = await fetch(path, {method: method||'GET', headers:{'Content-Type':'application/json'}, body: body?JSON.stringify(body):undefined});
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error || 'সার্ভার সমস্যা হয়েছে!');
+  return d;
+}
+function bn(n){ return String(n).replace(/\d/g, d=>'০১২৩৪৫৬৭৮৯'[d]); }
+function fmtTime(totalSecs){
+  let mins = Math.floor(totalSecs/60), hrs = Math.floor(mins/60);
+  return hrs + ' ঘণ্টা ' + (mins%60) + ' মিনিট';
+}
+function initial(name){ return (name||'J').trim().charAt(0); }
+function toggleAuth(isReg){
+  document.getElementById('login-box').classList.toggle('hidden', isReg);
+  document.getElementById('reg-box').classList.toggle('hidden', !isReg);
+  document.getElementById('seg-login').classList.toggle('active', !isReg);
+  document.getElementById('seg-reg').classList.toggle('active', isReg);
+}
+async function userRegister(){
+  let name = document.getElementById('user-reg-name').value.trim();
+  let mobile = document.getElementById('user-reg-mobile').value.trim();
+  let pass = document.getElementById('user-reg-pass').value.trim();
+  if(!name || !mobile || !pass){ toast('সবগুলো ঘর পূরণ করো!'); return; }
+  try{ await api('/api/register','POST',{name,mobile,pass}); toast('রেজিস্ট্রেশন সফল! এখন লগইন করো। 🎉'); toggleAuth(false); }
+  catch(e){ toast(e.message); }
+}
+async function userLogin(){
+  let mobile = document.getElementById('user-login-mobile').value.trim();
+  let pass = document.getElementById('user-login-pass').value.trim();
+  try{
+    const d = await api('/api/login','POST',{mobile,pass});
+    currentUser = d.user;
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('user-dashboard').classList.remove('hidden');
+    document.getElementById('bottom-nav').classList.remove('hidden');
+    document.getElementById('me-name').innerText = currentUser.name;
+    document.getElementById('me-avatar').innerText = initial(currentUser.name);
+    document.getElementById('p-avatar').innerText = initial(currentUser.name);
+    document.getElementById('p-name').innerText = currentUser.name;
+    document.getElementById('p-mobile').innerText = currentUser.mobile;
+    updateTimeDisplay();
+    loadAllData();
+  }catch(e){ toast('মোবাইল নম্বর বা পাসওয়ার্ড ভুল!'); }
+}
+function userLogout(){
+  currentUser = null;
+  document.getElementById('user-dashboard').classList.add('hidden');
+  document.getElementById('bottom-nav').classList.add('hidden');
+  document.getElementById('auth-section').classList.remove('hidden');
+}
+function switchTab(tab, btn){
+  document.querySelectorAll('.user-sub-tab').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('ustub-'+tab).classList.remove('hidden');
+  btn.parentElement.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAllData();
+}
+function fmtClock(s){
+  let h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
+  return bn(String(h).padStart(2,'0')) + ':' + bn(String(m).padStart(2,'0')) + ':' + bn(String(ss).padStart(2,'0'));
+}
+function startTimer(){
+  document.getElementById('start-btn').classList.add('hidden');
+  document.getElementById('stop-btn').classList.remove('hidden');
+  secondsElapsed = 0;
+  document.getElementById('timer-text').innerText = fmtClock(0);
+  timerInterval = setInterval(()=>{
+    secondsElapsed++;
+    document.getElementById('timer-text').innerText = fmtClock(secondsElapsed);
+    document.getElementById('stat-mins').innerText = bn(Math.floor(secondsElapsed/60)) + ' মিনিট';
+    let pct = Math.min(secondsElapsed/1800, 1);
+    document.getElementById('ring-fg').style.strokeDashoffset = 553 * (1 - pct);
+    document.getElementById('ring-label').innerText = pct >= 1 ? '🎉 আজকের লক্ষ্য পূরণ!' : 'আজকের লক্ষ্য: ৩০ মিনিট';
+  }, 1000);
+}
+async function stopTimer(){
+  clearInterval(timerInterval);
+  document.getElementById('stop-btn').classList.add('hidden');
+  document.getElementById('start-btn').classList.remove('hidden');
+  if(secondsElapsed > 0 && currentUser){
+    try{
+      const d = await api('/api/study/add','POST',{mobile: currentUser.mobile, seconds: secondsElapsed});
+      currentUser = d.user;
+      updateTimeDisplay();
+      toast('পড়ার সময় সেভ হয়েছে! 🎉');
+      loadAllData();
+    }catch(e){ toast('সেভ হয়নি: ' + e.message); }
+  }
+  secondsElapsed = 0;
+  document.getElementById('timer-text').innerText = fmtClock(0);
+  document.getElementById('ring-fg').style.strokeDashoffset = 553;
+}
+function myRank(){
+  if(!currentUser) return null;
+  const i = allUsers.findIndex(u=>u.mobile === currentUser.mobile);
+  return i === -1 ? null : i + 1;
+}
+function updateTimeDisplay(){
+  let totalSecs = currentUser ? (currentUser.studySeconds || 0) : 0;
+  document.getElementById('stat-hours').innerText = fmtTime(totalSecs);
+  document.getElementById('p-total').innerText = fmtTime(totalSecs) + ' (' + bn(totalSecs) + ' সেকেন্ড)';
+  const r = myRank();
+  document.getElementById('stat-rank').innerText = r ? '#' + bn(r) : '#—';
+  document.getElementById('p-rank').innerText = r ? '#' + bn(r) : '—';
+  document.getElementById('me-rank-pill').innerText = r ? '🏆 #' + bn(r) : '🏆 নতুন';
+}
+async function addUserDoc(){
+  let title = document.getElementById('doc-title').value.trim();
+  let link = document.getElementById('doc-link').value.trim();
+  if(!title || !link){ toast('নাম ও লিংক দাও!'); return; }
+  try{
+    await api('/api/docs','POST',{title, link, addedBy: currentUser.name});
+    document.getElementById('doc-title').value = '';
+    document.getElementById('doc-link').value = '';
+    loadAllData(); toast('ডকুমেন্ট যুক্ত হয়েছে! ✅');
+  }catch(e){ toast(e.message); }
+}
+async function uploadPdf(){
+  const title = document.getElementById('pdf-title').value.trim();
+  const fileInput = document.getElementById('pdf-file');
+  const file = fileInput.files[0];
+  if(!title){ toast('পিডিএফের নাম লিখো!'); return; }
+  if(!file){ toast('একটা PDF ফাইল বেছে নাও!'); return; }
+  if(file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')){ toast('শুধু PDF ফাইল আপলোড করা যায়!'); return; }
+  if(file.size > 10*1024*1024){ toast('ফাইল ১০ MB এর বেশি হতে পারবে না!'); return; }
+  const prog = document.getElementById('upload-prog'), fill = document.getElementById('upload-fill'), status = document.getElementById('upload-status');
+  prog.classList.remove('hidden'); status.classList.remove('hidden'); status.innerText = 'আপলোড হচ্ছে… ⏳';
+  fill.style.width = '40%';
+  try{
+    const fd = new FormData();
+    fd.append('title', title); fd.append('addedBy', currentUser.name); fd.append('file', file);
+    const r = await fetch('/api/pdfs', {method:'POST', body: fd});
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(d.error || 'আপলোড হয়নি!');
+    fill.style.width = '100%'; status.innerText = '✅ আপলোড সম্পূর্ণ!';
+    document.getElementById('pdf-title').value = ''; fileInput.value = '';
+    setTimeout(()=>{ prog.classList.add('hidden'); fill.style.width = '0%'; }, 1200);
+    loadAllData(); toast('পিডিএফ আপলোড হয়েছে! 🎉');
+  }catch(e){ status.innerText = '❌ ' + e.message; toast(e.message); }
+}
+function openPdfReader(title, link){
+  let embedLink = link.replace('/view?usp=sharing','/preview').replace('/view','/preview');
+  document.getElementById('reader-title').innerText = 'পড়ছো: ' + title;
+  document.getElementById('pdf-frame').src = embedLink;
+  document.getElementById('pdf-reader-box').classList.remove('hidden');
+  document.getElementById('pdf-reader-box').scrollIntoView({behavior:'smooth'});
+}
+function openPdfFile(id, title){
+  document.getElementById('reader-title').innerText = 'পড়ছো: ' + title;
+  document.getElementById('pdf-frame').src = '/api/pdfs/' + id + '/file';
+  document.getElementById('pdf-reader-box').classList.remove('hidden');
+  document.getElementById('pdf-reader-box').scrollIntoView({behavior:'smooth'});
+}
+function closeReader(){
+  document.getElementById('pdf-reader-box').classList.add('hidden');
+  document.getElementById('pdf-frame').src = '';
+}
+function esc(s){ return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+async function loadAllData(){
+  let d;
+  try{ d = await api('/api/data'); }catch(e){ return; }
+  allUsers = d.users || [];
+  let notices = d.notices || [];
+  let board = document.getElementById('user-notice-board');
+  board.innerHTML = notices.length ? '' : '<div class="notice empty">কোনো নোটিশ নেই।</div>';
+  notices.forEach(n => board.innerHTML += '<div class="notice">📢 ' + esc(n) + '</div>');
+  updateTimeDisplay();
+  const top = allUsers.slice(0,3);
+  const medals = ['🥇','🥈','🥉'], rings = ['ring-gold','ring-silver','ring-bronze'];
+  const order = top.length >= 3 ? [top[1], top[0], top[2]] : top;
+  let pod = document.getElementById('podium');
+  pod.innerHTML = '';
+  if(top.length){
+    pod.innerHTML = '<div class="podium">' + order.map((u)=>{
+      const rank = allUsers.indexOf(u);
+      const isFirst = rank === 0;
+      return '<div class="podium-card' + (isFirst?' first':'') + '">' + (isFirst?'<div class="crown">👑</div>':'') +
+        '<div class="medal">' + medals[rank] + '</div>' +
+        '<div class="p-avatar ' + rings[rank] + '">' + esc(initial(u.name)) + '</div>' +
+        '<div class="p-name">' + esc(u.name) + '</div>' +
+        '<div class="p-time">' + fmtTime(u.studySeconds||0) + '</div></div>';
+    }).join('') + '</div>';
+  }
+  let rankDiv = document.getElementById('leaderboard-list');
+  rankDiv.innerHTML = allUsers.length ? '' : '<p class="muted center">এখনো কেউ পড়া শুরু করেনি।</p>';
+  allUsers.forEach((u, i)=>{
+    const me = currentUser && u.mobile === currentUser.mobile;
+    rankDiv.innerHTML += '<div class="row' + (me?' me-row':'') + '">' +
+      '<div class="rank">' + bn(i+1) + '</div>' +
+      '<div class="avatar">' + esc(initial(u.name)) + '</div>' +
+      '<div class="who"><div class="n">' + esc(u.name) + (me?' 🌟 তুমি':'') + '</div><div class="c">মোট পড়া: ' + fmtTime(u.studySeconds||0) + '</div></div>' +
+      '<div class="t"><div class="f">' + bn(u.studySeconds||0) + 's</div><div class="s">সেকেন্ড</div></div></div>';
+  });
+  const docs = d.docs || [], pdfs = d.pdfs || [];
+  const docsDiv = document.getElementById('docs-list');
+  let html = '';
+  pdfs.forEach(p=>{
+    html += '<div class="card doc-card"><h4>📕 ' + esc(p.title) + '</h4>' +
+      '<small>📤 আপলোড করেছেন: ' + esc(p.addedBy) + ' • ' + esc(p.filename||'') + '</small><br><span class="chip pdf">PDF ফাইল</span><br>' +
+      '<button class="btn blue sm" onclick="openPdfFile(' + p.id + ', \'' + esc(p.title) + '\')">অ্যাপের ভেতরে পড়ো 📖</button> ' +
+      '<a class="btn ghost sm" style="display:inline-block;text-decoration:none;text-align:center" href="/api/pdfs/' + p.id + '/file" target="_blank">⬇️ ডাউনলোড</a></div>';
+  });
+  docs.forEach(dd=>{
+    html += '<div class="card doc-card"><h4>📄 ' + esc(dd.title) + '</h4>' +
+      '<small>যোগ করেছেন: ' + esc(dd.addedBy) + '</small><br><span class="chip link">লিংক</span><br>' +
+      '<button class="btn blue sm" onclick="openPdfReader(\'' + esc(dd.title) + '\', \'' + esc(dd.link) + '\')">অ্যাপের ভেতরে পড়ো 📖</button></div>';
+  });
+  docsDiv.innerHTML = html || '<p class="muted center">কোনো ডকুমেন্ট যোগ করা হয়নি।</p>';
+  const books = d.books || [];
+  const booksDiv = document.getElementById('books-list');
+  booksDiv.innerHTML = books.length ? '' : '<p class="muted center">অ্যাডমিন এখনো কোনো বই যোগ করেননি।</p>';
+  books.forEach((b, i)=>{
+    const colors = ['#a78bfa','#22d3ee','#ffb020','#ff5e8a','#22c55e'];
+    const c = colors[i % colors.length];
+    booksDiv.innerHTML += '<div class="card book-card" style="border-left-color:' + c + '"><h4>📚 ' + esc(b.title) + '</h4>' +
+      '<small>লেখক/প্রকাশনী: ' + esc(b.author) + '</small><br><span class="chip book">বই</span><br>' +
+      '<button class="btn violet sm" onclick="openPdfReader(\'' + esc(b.title) + '\', \'' + esc(b.link) + '\'); switchTab(\'docs\', document.querySelectorAll(\'#bottom-nav .nav-btn\')[2]);">বইটি পড়ো 📖</button></div>';
+  });
+}
 </script>
 </body>
 </html>

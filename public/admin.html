@@ -3,72 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobAppFrnd Admin - সরকারি চাকরি প্রস্তুতি</title>
+    <title>JobAppFrnd অ্যাডমিন — সরকারি চাকরি প্রস্তুতি</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: #333; }
-        .container { max-width: 480px; margin: auto; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
-        header { background: #dc3545; color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; }
-        .content { padding: 15px; flex: 1; overflow-y: auto; }
+        :root {
+            --bg: #0b0e1a;
+            --bg2: #11162a;
+            --card: rgba(255,255,255,.055);
+            --card-border: rgba(255,255,255,.09);
+            --lime: #c8f542;
+            --lime-dim: #9dc72e;
+            --violet: #8b7bff;
+            --gold: #ffd34d;
+            --cyan: #22d3ee;
+            --pink: #ff5e8a;
+            --red: #ff4d6d;
+            --text: #f2f4ff;
+            --muted: #9aa0c3;
+            --danger: #ff6b6b;
+            --radius: 20px;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* ---- floating color orbs (transform-only, cheap on low-end phones) ---- */
+        .bg-orbs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .38; animation: drift 14s ease-in-out infinite alternate; }
+        .o1 { width: 340px; height: 340px; background: #ff2d55; top: -100px; left: -90px; }
+        .o2 { width: 300px; height: 300px; background: #5b4bff; top: 34%; right: -110px; animation-delay: -5s; }
+        .o3 { width: 240px; height: 240px; background: #0fbf8f; bottom: 4%; left: -70px; animation-delay: -9s; opacity: .28; }
+        .o4 { width: 200px; height: 200px; background: #ffb020; top: 62%; left: 62%; opacity: .16; animation-delay: -3s; }
+        @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(46px,36px) scale(1.14); } }
+
         .hidden { display: none !important; }
-        input, textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; background: #dc3545; color: white; border: none; padding: 10px; border-radius: 5px; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
-        .card { background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .container { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 0 16px 48px; min-height: 100vh; }
+
+        /* ---- hero header ---- */
+        header {
+            margin: 16px 0 6px;
+            padding: 26px 20px 22px;
+            text-align: center;
+            border-radius: 26px;
+            background: linear-gradient(135deg, #ff2d55 0%, #c026d3 52%, #5b4bff 100%);
+            box-shadow: 0 14px 40px rgba(255,45,85,.35), 0 0 0 1px rgba(255,255,255,.12) inset;
+            position: relative;
+            overflow: hidden;
+            animation: rise .5s ease both;
+        }
+        header::after {
+            content: ''; position: absolute; width: 180px; height: 180px; border-radius: 50%;
+            background: rgba(255,255,255,.12); right: -60px; top: -70px;
+        }
+        .brand { font-size: 30px; font-weight: 800; letter-spacing: -.5px; line-height: 1.15; }
+        .brand .shimmer {
+            background: linear-gradient(110deg, #fff 20%, var(--gold) 40%, #fff 55%, #ffe9a8 70%, #fff 90%);
+            background-size: 220% auto;
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            animation: shine 2.6s linear infinite;
+        }
+        @keyframes shine { to { background-position: 220% center; } }
+        .brand-sub { margin: 6px 0 0; font-size: 14px; color: rgba(255,255,255,.85); font-weight: 600; }
+        .admin-badge {
+            display: inline-block; margin-top: 12px; font-size: 12px; font-weight: 800; letter-spacing: 1.5px;
+            background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.35);
+            padding: 6px 14px; border-radius: 999px;
+        }
+
+        .content { padding-top: 6px; }
+        .section-title { font-size: 19px; font-weight: 800; margin: 22px 4px 4px; animation: rise .5s ease both; }
+        .section-sub { font-size: 13px; color: var(--muted); margin: 0 4px 4px; }
+
+        /* ---- glass cards ---- */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 18px;
+            margin: 14px 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+            animation: rise .45s ease both;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,.45); }
+        .card:nth-child(2) { animation-delay: .05s; }
+        .card:nth-child(3) { animation-delay: .1s; }
+        .card:nth-child(4) { animation-delay: .15s; }
+        .card:nth-child(5) { animation-delay: .2s; }
+        @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+        .card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+        .icon-badge {
+            width: 46px; height: 46px; flex: none; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; font-size: 23px;
+            box-shadow: 0 6px 18px rgba(0,0,0,.4);
+        }
+        .card h4 { margin: 0; font-size: 17px; font-weight: 800; }
+        .card .card-hint { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+        .accent-violet { border-left: 4px solid var(--violet); }
+        .accent-violet .icon-badge { background: linear-gradient(135deg, #8b7bff, #5b4bff); }
+        .accent-gold { border-left: 4px solid var(--gold); }
+        .accent-gold .icon-badge { background: linear-gradient(135deg, #ffd34d, #ff9f1c); }
+        .accent-pink { border-left: 4px solid var(--pink); }
+        .accent-pink .icon-badge { background: linear-gradient(135deg, #ff5e8a, #ff2d55); }
+        .accent-cyan { border-left: 4px solid var(--cyan); }
+        .accent-cyan .icon-badge { background: linear-gradient(135deg, #22d3ee, #0ea5e9); }
+        .accent-lime { border-left: 4px solid var(--lime); }
+        .accent-lime .icon-badge { background: linear-gradient(135deg, #c8f542, #65a30d); }
+        .accent-red { border-left: 4px solid var(--red); }
+        .accent-red .icon-badge { background: linear-gradient(135deg, #ff4d6d, #dc2626); }
+
+        /* ---- inputs & buttons ---- */
+        input, textarea {
+            width: 100%; background: rgba(0,0,0,.35); border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 13px 14px; color: var(--text); font-size: 16px; margin-top: 10px;
+            font-family: inherit;
+        }
+        textarea { min-height: 84px; resize: vertical; }
+        input:focus, textarea:focus { outline: 2px solid var(--violet); border-color: transparent; }
+        input::placeholder, textarea::placeholder { color: #6b7194; }
+        button {
+            width: 100%; border: none; border-radius: 14px; padding: 13px 18px;
+            font-size: 15px; font-weight: 700; cursor: pointer; color: #fff; margin-top: 10px;
+            transition: transform .08s ease, filter .15s ease, box-shadow .15s ease;
+            font-family: inherit;
+        }
+        button:active { transform: scale(.97); }
+        button:hover { filter: brightness(1.1); }
+        .btn-violet { background: linear-gradient(135deg, #8b7bff, #5b4bff); box-shadow: 0 6px 22px rgba(139,123,255,.4); }
+        .btn-gold { background: linear-gradient(135deg, #ffd34d, #ff9f1c); color: #3a2c00; box-shadow: 0 6px 22px rgba(255,211,77,.35); }
+        .btn-pink { background: linear-gradient(135deg, #ff5e8a, #ff2d55); box-shadow: 0 6px 22px rgba(255,45,85,.4); }
+        .btn-cyan { background: linear-gradient(135deg, #22d3ee, #0ea5e9); color: #03252e; box-shadow: 0 6px 22px rgba(34,211,238,.35); }
+        .btn-lime { background: linear-gradient(135deg, #c8f542, #9dc72e); color: #131602; box-shadow: 0 6px 22px rgba(200,245,66,.35); }
+        .btn-red { background: linear-gradient(135deg, #ff4d6d, #dc2626); box-shadow: 0 6px 22px rgba(255,77,109,.35); }
+        .btn-ghost { background: transparent; border: 1px solid var(--card-border); color: var(--text); }
+        .btn-small { width: auto; padding: 7px 14px; font-size: 13px; margin-top: 8px; border-radius: 10px; }
+
+        /* ---- login ---- */
+        .login-wrap { padding: 34px 4px 10px; text-align: center; animation: rise .5s ease both; }
+        .login-logo { font-size: 62px; filter: drop-shadow(0 0 26px rgba(255,45,85,.6)); animation: bob 2.4s ease-in-out infinite; }
+        @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        .login-card { text-align: left; margin-top: 18px; }
+        .login-card h3 { margin: 0 0 4px; font-size: 19px; }
+        .login-card p { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+        /* ---- PDF upload ---- */
+        .file-picker {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            border: 2px dashed rgba(255,94,138,.55); border-radius: 14px;
+            background: rgba(255,94,138,.07); padding: 18px 12px; margin-top: 12px;
+            cursor: pointer; font-weight: 700; font-size: 15px; text-align: center;
+            transition: background .15s ease, transform .1s ease;
+        }
+        .file-picker:active { transform: scale(.98); }
+        .file-picker:hover { background: rgba(255,94,138,.13); }
+        .file-name { margin-top: 8px; font-size: 13px; color: var(--gold); word-break: break-all; }
+        .upload-status { margin-top: 10px; font-size: 14px; font-weight: 700; min-height: 20px; }
+        .upload-status.ok { color: #37e08b; }
+        .upload-status.err { color: var(--danger); }
+        .upload-status.busy { color: var(--gold); }
+        .max-note { font-size: 12px; color: var(--muted); margin: 8px 0 0; text-align: center; }
+
+        /* ---- user list ---- */
+        .user-row {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--card); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 13px 14px; margin: 10px 0;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            animation: rise .35s ease both;
+        }
+        .user-avatar {
+            width: 44px; height: 44px; flex: none; border-radius: 50%;
+            background: linear-gradient(135deg, #ff4d6d, #8b7bff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 800;
+        }
+        .user-info { flex: 1; min-width: 0; }
+        .user-info strong { font-size: 15px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-info small { color: var(--muted); font-size: 12.5px; }
+        .empty-note { text-align: center; color: var(--muted); padding: 18px 0; }
+
+        .logout-btn { margin-top: 24px; }
+        .footer-note { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
     </style>
 </head>
 <body>
+<div class="bg-orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div></div>
 
 <div class="container">
-    <header id="admin-header">JobAppFrnd Admin - প্যানেল লগইন</header>
+    <header id="admin-header">
+        <div class="brand">JobAppFrnd <span class="shimmer">অ্যাডমিন</span></div>
+        <p class="brand-sub" id="admin-subtitle">সরকারি চাকরি প্রস্তুতি — কন্ট্রোল প্যানেল</p>
+        <span class="admin-badge">🛡️ এডমিন প্যানেল</span>
+    </header>
 
     <div class="content">
         <!-- Admin Login -->
-        <div id="admin-login-box">
-            <h3>এডমিন সিক্রেট লগইন</h3>
-            <input type="text" id="admin-user" placeholder="এডমিন ইউজারনেম (admin)">
-            <input type="password" id="admin-pass" placeholder="পাসওয়ার্ড (1234)">
-            <button onclick="adminLogin()">প্রবেশ করুন</button>
+        <div id="admin-login-box" class="login-wrap">
+            <div class="login-logo">🛡️</div>
+            <div class="card login-card accent-red">
+                <h3>এডমিন লগইন</h3>
+                <p>শুধু এডমিনের জন্য — লগইন করে প্যানেল খুলুন।</p>
+                <input type="text" id="admin-user" placeholder="ইউজারনেম" autocomplete="username">
+                <input type="password" id="admin-pass" placeholder="পাসওয়ার্ড" autocomplete="current-password">
+                <button class="btn-red" onclick="adminLogin()">প্রবেশ করুন</button>
+            </div>
         </div>
 
         <!-- Admin Dashboard -->
         <div id="admin-dashboard" class="hidden">
-            
+
+            <h3 class="section-title">👋 স্বাগতম, এডমিন!</h3>
+            <p class="section-sub">এখান থেকে নোটিশ, বই, পিডিএফ আর বন্ধুদের সবকিছু চালান।</p>
+
             <!-- Post Idea -->
-            <div class="card">
-                <h4>📢 নতুন আইডিয়া বা নোটিশ পোস্ট করুন</h4>
-                <textarea id="admin-idea-text" placeholder="এখানে নতুন আইডিয়া বা নোটিশ লিখুন..."></textarea>
-                <button onclick="postIdea()">পোস্ট করুন</button>
+            <div class="card accent-violet">
+                <div class="card-head">
+                    <div class="icon-badge">📢</div>
+                    <div><h4>নতুন নোটিশ পোস্ট করুন</h4><p class="card-hint">আইডিয়া বা নোটিশ — সব বন্ধু হোমে দেখবে।</p></div>
+                </div>
+                <textarea id="admin-idea-text" placeholder="এখানে নতুন আইডিয়া বা নোটিশ লিখুন..."></textarea>
+                <button class="btn-violet" onclick="postIdea()">পোস্ট করুন</button>
             </div>
 
             <!-- Add Book -->
-            <div class="card" style="border-left-color: #6f42c1;">
-                <h4>📚 নতুন বই যোগ করুন</h4>
-                <input type="text" id="book-title" placeholder="বইয়ের নাম (যেমন: এমপিথ্রি বাংলা)">
+            <div class="card accent-gold">
+                <div class="card-head">
+                    <div class="icon-badge">📚</div>
+                    <div><h4>নতুন বই যোগ করুন</h4><p class="card-hint">লাইব্রেরিতে বইয়ের লিংক যোগ করুন।</p></div>
+                </div>
+                <input type="text" id="book-title" placeholder="বইয়ের নাম (যেমন: এমপিথ্রি বাংলা)">
                 <input type="text" id="book-author" placeholder="লেখক বা প্রকাশনী">
-                <input type="text" id="book-link" placeholder="বইয়ের PDF বা Google Drive লিংক">
-                <button onclick="addBook()" style="background: #6f42c1;">বই যোগ করুন</button>
+                <input type="text" id="book-link" placeholder="বইয়ের PDF বা Google Drive লিংক">
+                <button class="btn-gold" onclick="addBook()">বই যোগ করুন</button>
+            </div>
+
+            <!-- PDF Direct Upload -->
+            <div class="card accent-pink">
+                <div class="card-head">
+                    <div class="icon-badge">📤</div>
+                    <div><h4>পিডিএফ সরাসরি আপলোড করুন</h4><p class="card-hint">ফাইল থেকে পিডিএফ তুলুন — লিংক লাগবে না।</p></div>
+                </div>
+                <input type="text" id="pdf-upload-title" placeholder="পিডিএফের নাম (যেমন: বিসিএস প্রশ্নব্যাংক)">
+                <label class="file-picker" for="pdf-upload-file">📄 পিডিএফ ফাইল বেছে নিন</label>
+                <input type="file" id="pdf-upload-file" accept="application/pdf" class="hidden">
+                <div class="file-name" id="pdf-file-name"></div>
+                <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF</p>
+                <button class="btn-pink" onclick="uploadPdf()">আপলোড করুন</button>
+                <div class="upload-status" id="pdf-upload-status"></div>
             </div>
 
             <!-- Add Document -->
-            <div class="card" style="border-left-color: #17a2b8;">
-                <h4>📄 সরকারি চাকরির ডকুমেন্ট / সার্কুলার যোগ</h4>
+            <div class="card accent-cyan">
+                <div class="card-head">
+                    <div class="icon-badge">📄</div>
+                    <div><h4>ডকুমেন্ট / সার্কুলার যোগ করুন</h4><p class="card-hint">লিংক দিয়ে সরকারি চাকরির ডকুমেন্ট যোগ করুন।</p></div>
+                </div>
                 <input type="text" id="admin-doc-title" placeholder="ডকুমেন্টের নাম">
                 <input type="text" id="admin-doc-link" placeholder="PDF বা Drive লিংক">
-                <button onclick="addAdminDoc()" style="background: #17a2b8;">ডকুমেন্ট যোগ করুন</button>
+                <button class="btn-cyan" onclick="addAdminDoc()">ডকুমেন্ট যোগ করুন</button>
             </div>
 
             <!-- Add New Friend -->
-            <div class="card" style="border-left-color: #28a745;">
-                <h4>➕ নতুন বন্ধু যুক্ত করুন (Add User)</h4>
+            <div class="card accent-lime">
+                <div class="card-head">
+                    <div class="icon-badge">➕</div>
+                    <div><h4>নতুন বন্ধু যুক্ত করুন</h4><p class="card-hint">বন্ধুর নাম, মোবাইল আর পাসওয়ার্ড দিন।</p></div>
+                </div>
                 <input type="text" id="new-u-name" placeholder="বন্ধুর নাম">
                 <input type="text" id="new-u-mobile" placeholder="মোবাইল নাম্বার">
-                <input type="password" id="new-u-pass" placeholder="পাসওয়ার্ড">
-                <button onclick="addNewUser()" style="background: #28a745;">বন্ধু অ্যাড করুন</button>
+                <input type="password" id="new-u-pass" placeholder="পাসওয়ার্ড">
+                <button class="btn-lime" onclick="addNewUser()">বন্ধু অ্যাড করুন</button>
             </div>
 
-            <h3>👥 বন্ধুদের তালিকা ও রিমুভ অপশন</h3>
+            <h3 class="section-title">👥 বন্ধুদের তালিকা</h3>
+            <p class="section-sub">যেকোনো বন্ধুকে এখান থেকে রিমুভ করা যাবে।</p>
             <div id="admin-user-list"></div>
-            
-            <button onclick="adminLogout()" style="background: #6c757d; margin-top: 25px;">লগআউট</button>
+
+            <button class="btn-ghost logout-btn" onclick="adminLogout()">লগআউট</button>
+            <p class="footer-note">JobAppFrnd অ্যাডমিন • সরকারি চাকরি প্রস্তুতি</p>
         </div>
     </div>
 </div>
@@ -88,21 +308,21 @@
             await api('/api/admin/login', 'POST', { user: u, pass: p });
             document.getElementById('admin-login-box').classList.add('hidden');
             document.getElementById('admin-dashboard').classList.remove('hidden');
-            document.getElementById('admin-header').innerText = 'JobAppFrnd - এডমিন কন্ট্রোল প্যানেল';
+            document.getElementById('admin-subtitle').innerText = 'কন্ট্রোল প্যানেল — স্বাগতম, এডমিন!';
             loadAdminUsers();
-        } catch(e) { alert('ভুল ইউজারনেম বা পাসওয়ার্ড!'); }
+        } catch(e) { alert('ভুল ইউজারনেম বা পাসওয়ার্ড!'); }
     }
 
     function adminLogout() {
         document.getElementById('admin-dashboard').classList.add('hidden');
         document.getElementById('admin-login-box').classList.remove('hidden');
-        document.getElementById('admin-header').innerText = 'JobAppFrnd Admin - প্যানেল লগইন';
+        document.getElementById('admin-subtitle').innerText = 'সরকারি চাকরি প্রস্তুতি — কন্ট্রোল প্যানেল';
     }
 
     async function postIdea() {
         let text = document.getElementById('admin-idea-text').value.trim();
         if(!text) return;
-        try { await api('/api/notices', 'POST', { text }); document.getElementById('admin-idea-text').value = ''; alert('সফলভাবে নোটিশ পোস্ট করা হয়েছে!'); }
+        try { await api('/api/notices', 'POST', { text }); document.getElementById('admin-idea-text').value = ''; alert('সফলভাবে নোটিশ পোস্ট করা হয়েছে!'); }
         catch(e) { alert(e.message); }
     }
 
@@ -110,13 +330,13 @@
         let title = document.getElementById('book-title').value.trim();
         let author = document.getElementById('book-author').value.trim();
         let link = document.getElementById('book-link').value.trim();
-        if(!title || !link) { alert('বইয়ের নাম ও লিংক দিন!'); return; }
+        if(!title || !link) { alert('বইয়ের নাম ও লিংক দিন!'); return; }
         try {
             await api('/api/books', 'POST', { title, author, link });
             document.getElementById('book-title').value = '';
             document.getElementById('book-author').value = '';
             document.getElementById('book-link').value = '';
-            alert('বই সফলভাবে লাইব্রেরিতে যুক্ত হয়েছে!');
+            alert('বই সফলভাবে লাইব্রেরিতে যুক্ত হয়েছে!');
         } catch(e) { alert(e.message); }
     }
 
@@ -128,8 +348,49 @@
             await api('/api/docs', 'POST', { title, link, addedBy: 'Admin' });
             document.getElementById('admin-doc-title').value = '';
             document.getElementById('admin-doc-link').value = '';
-            alert('ডকুমেন্ট সফলভাবে যুক্ত হয়েছে!');
+            alert('ডকুমেন্ট সফলভাবে যুক্ত হয়েছে!');
         } catch(e) { alert(e.message); }
+    }
+
+    // PDF file picker: show chosen file name
+    document.getElementById('pdf-upload-file').addEventListener('change', function() {
+        let f = this.files && this.files[0];
+        document.getElementById('pdf-file-name').innerText = f ? '📄 ' + f.name : '';
+    });
+
+    async function uploadPdf() {
+        let status = document.getElementById('pdf-upload-status');
+        let title = document.getElementById('pdf-upload-title').value.trim();
+        let fileInput = document.getElementById('pdf-upload-file');
+        let file = fileInput.files && fileInput.files[0];
+        status.className = 'upload-status';
+        if(!title) { status.innerText = 'আগে পিডিএফের নাম লিখুন!'; status.classList.add('err'); return; }
+        if(!file) { status.innerText = 'আগে একটি পিডিএফ ফাইল বেছে নিন!'; status.classList.add('err'); return; }
+        if(file.type && file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+            status.innerText = 'শুধু PDF ফাইল আপলোড করা যাবে!'; status.classList.add('err'); return;
+        }
+        if(file.size > 10 * 1024 * 1024) {
+            status.innerText = 'ফাইলটি ১০ MB-এর বেশি — ছোট ফাইল দিন!'; status.classList.add('err'); return;
+        }
+        let fd = new FormData();
+        fd.append('title', title);
+        fd.append('addedBy', 'Admin');
+        fd.append('file', file);
+        status.innerText = 'আপলোড হচ্ছে…';
+        status.classList.add('busy');
+        try {
+            const r = await fetch('/api/pdfs', { method: 'POST', body: fd });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(d.error || 'আপলোড হয়নি!');
+            status.innerText = '✅ পিডিএফ সফলভাবে আপলোড হয়েছে!';
+            status.className = 'upload-status ok';
+            document.getElementById('pdf-upload-title').value = '';
+            fileInput.value = '';
+            document.getElementById('pdf-file-name').innerText = '';
+        } catch(e) {
+            status.innerText = '❌ ' + (e.message || 'আপলোড হয়নি! আবার চেষ্টা করুন।');
+            status.className = 'upload-status err';
+        }
     }
 
     async function addNewUser() {
@@ -143,7 +404,7 @@
             document.getElementById('new-u-mobile').value = '';
             document.getElementById('new-u-pass').value = '';
             loadAdminUsers();
-            alert('নতুন বন্ধু সফলভাবে অ্যাড করা হয়েছে!');
+            alert('নতুন বন্ধু সফলভাবে অ্যাড করা হয়েছে!');
         } catch(e) { alert(e.message); }
     }
 
@@ -152,21 +413,25 @@
         try { d = await api('/api/admin/users'); } catch(e) { return; }
         let users = d.users || [];
         let listDiv = document.getElementById('admin-user-list');
-        listDiv.innerHTML = users.length ? '' : '<p>কোনো বন্ধু নেই।</p>';
+        listDiv.innerHTML = users.length ? '' : '<p class="empty-note">কোনো বন্ধু নেই।</p>';
         users.forEach((u) => {
             let mins = Math.floor((u.studySeconds || 0) / 60);
+            let initial = (u.name || '?').trim().charAt(0);
             listDiv.innerHTML += `
-                <div class="card">
-                    <strong>${u.name}</strong> (${u.mobile})<br>
-                    মোট পড়া: ${mins} মিনিট (${u.studySeconds || 0} সেকেন্ড)<br>
-                    <button onclick="removeUser(${u.id})" style="background: #dc3545; padding: 5px; margin-top: 5px; width: auto;">রিমুভ করুন</button>
+                <div class="user-row">
+                    <div class="user-avatar">${initial}</div>
+                    <div class="user-info">
+                        <strong>${u.name}</strong>
+                        <small>${u.mobile} • মোট পড়া: ${mins} মিনিট (${u.studySeconds || 0} সেকেন্ড)</small>
+                    </div>
+                    <button class="btn-red btn-small" onclick="removeUser(${u.id})">রিমুভ</button>
                 </div>`;
         });
     }
 
     async function removeUser(id) {
         if(!confirm('এই বন্ধুকে রিমুভ করবেন?')) return;
-        try { await api('/api/admin/users/' + id, 'DELETE'); loadAdminUsers(); alert('বন্ধু সফলভাবে রিমুভ করা হয়েছে!'); }
+        try { await api('/api/admin/users/' + id, 'DELETE'); loadAdminUsers(); alert('বন্ধু সফলভাবে রিমুভ করা হয়েছে!'); }
         catch(e) { alert(e.message); }
     }
 </script>
