@@ -8,7 +8,20 @@
 // Local test e env na thakle file:local.db use hobe.
 const express = require('express');
 const path = require('path');
+const multer = require('multer');
 const { createClient } = require('@libsql/client');
+
+// PDF upload: memory storage, max 10 MB, PDF only.
+// Note: files are stored as BLOB in Turso (pdf_files table) so they survive
+// Render restarts — Render's disk is ephemeral, Turso is not.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) cb(null, true);
+    else cb(new Error('শুধু PDF ফাইল আপলোড করা যায়!'));
+  },
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,6 +61,16 @@ async function initDb() {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     link TEXT NOT NULL,
+    added_by TEXT NOT NULL DEFAULT 'Admin',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS pdf_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    mime TEXT NOT NULL DEFAULT 'application/pdf',
+    size INTEGER NOT NULL DEFAULT 0,
+    data BLOB NOT NULL,
     added_by TEXT NOT NULL DEFAULT 'Admin',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
@@ -91,17 +114,19 @@ app.post('/api/admin/login', (req, res) => {
 // ---- Combined data for user app ----
 app.get('/api/data', async (req, res) => {
   try {
-    const [notices, users, docs, books] = await Promise.all([
+    const [notices, users, docs, books, pdfs] = await Promise.all([
       db.execute('SELECT * FROM notices ORDER BY id DESC'),
       db.execute('SELECT id, name, mobile, study_seconds FROM users ORDER BY study_seconds DESC'),
       db.execute('SELECT * FROM docs ORDER BY id DESC'),
       db.execute('SELECT * FROM books ORDER BY id DESC'),
+      db.execute('SELECT id, title, filename, size, added_by FROM pdf_files ORDER BY id DESC'),
     ]);
     res.json({
       notices: notices.rows.map(r => r.text),
       users: users.rows.map(publicUser),
       docs: docs.rows.map(r => ({ id: r.id, title: r.title, link: r.link, addedBy: r.added_by })),
       books: books.rows.map(r => ({ id: r.id, title: r.title, author: r.author, link: r.link })),
+      pdfs: pdfs.rows.map(r => ({ id: r.id, title: r.title, filename: r.filename, size: r.size, addedBy: r.added_by })),
     });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
@@ -145,6 +170,39 @@ app.post('/api/docs', async (req, res) => {
     await db.execute({ sql: 'INSERT INTO docs (title, link, added_by) VALUES (?, ?, ?)', args: [String(title).trim(), String(link).trim(), String(addedBy || 'Admin')] });
     res.json({ ok: true });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// ---- PDF files: direct upload (stored as BLOB in Turso) ----
+app.post('/api/pdfs', (req, res) => {
+  upload.single('file')(req, res, async (err) => {
+    if (err) {
+      const msg = err.code === 'LIMIT_FILE_SIZE' ? 'ফাইল ১০ MB এর বেশি হতে পারবে না!' : (err.message || 'আপলোড হয়নি!');
+      return res.status(400).json({ error: msg });
+    }
+    try {
+      const title = String(req.body.title || '').trim();
+      if (!title) return res.status(400).json({ error: 'পিডিএফের নাম লিখুন!' });
+      if (!req.file) return res.status(400).json({ error: 'একটা PDF ফাইল বেছে নিন!' });
+      const r = await db.execute({
+        sql: 'INSERT INTO pdf_files (title, filename, mime, size, data, added_by) VALUES (?, ?, ?, ?, ?, ?)',
+        args: [title, req.file.originalname, req.file.mimetype || 'application/pdf', req.file.size, req.file.buffer, String(req.body.addedBy || 'Admin')],
+      });
+      res.json({ ok: true, pdf: { id: Number(r.lastInsertRowid), title, filename: req.file.originalname, size: req.file.size } });
+    } catch (e) { console.error(e); res.status(500).json({ error: 'সার্ভার সমস্যা হয়েছে!' }); }
+  });
+});
+
+app.get('/api/pdfs/:id/file', async (req, res) => {
+  try {
+    const r = await db.execute({ sql: 'SELECT filename, mime, data FROM pdf_files WHERE id = ?', args: [req.params.id] });
+    if (!r.rows.length) return res.status(404).send('PDF পাওয়া যায়নি!');
+    const row = r.rows[0];
+    const buf = Buffer.from(row.data);
+    res.setHeader('Content-Type', row.mime || 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="' + String(row.filename || 'file.pdf').replace(/"/g, '') + '"');
+    res.setHeader('Content-Length', buf.length);
+    res.send(buf);
+  } catch (e) { console.error(e); res.status(500).send('সার্ভার সমস্যা হয়েছে!'); }
 });
 
 // ---- Admin: users list / remove ----
