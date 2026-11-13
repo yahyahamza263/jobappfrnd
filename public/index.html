@@ -296,20 +296,27 @@ async function userLogin(){
   try{
     const d = await api('/api/login','POST',{mobile,pass});
     currentUser = d.user;
-    document.getElementById('auth-section').classList.add('hidden');
-    document.getElementById('user-dashboard').classList.remove('hidden');
-    document.getElementById('bottom-nav').classList.remove('hidden');
-    document.getElementById('me-name').innerText = currentUser.name;
-    document.getElementById('me-avatar').innerText = initial(currentUser.name);
-    document.getElementById('p-avatar').innerText = initial(currentUser.name);
-    document.getElementById('p-name').innerText = currentUser.name;
-    document.getElementById('p-mobile').innerText = currentUser.mobile;
-    updateTimeDisplay();
-    loadAllData();
+    try{ localStorage.setItem('jobappfrnd_user', JSON.stringify({name: currentUser.name, mobile: currentUser.mobile})); }catch(e){}
+    showDashboard();
   }catch(e){ toast('মোবাইল নম্বর বা পাসওয়ার্ড ভুল!'); }
+}
+function showDashboard(){
+  document.getElementById('auth-section').classList.add('hidden');
+  document.getElementById('user-dashboard').classList.remove('hidden');
+  document.getElementById('bottom-nav').classList.remove('hidden');
+  document.getElementById('me-name').innerText = currentUser.name;
+  document.getElementById('me-avatar').innerText = initial(currentUser.name);
+  document.getElementById('p-avatar').innerText = initial(currentUser.name);
+  document.getElementById('p-name').innerText = currentUser.name;
+  document.getElementById('p-mobile').innerText = currentUser.mobile;
+  updateTimeDisplay();
+  loadAllData();
+  resumeTimer();
 }
 function userLogout(){
   currentUser = null;
+  clearInterval(timerInterval);
+  try{ localStorage.removeItem('jobappfrnd_user'); localStorage.removeItem('jobappfrnd_timer'); }catch(e){}
   document.getElementById('user-dashboard').classList.add('hidden');
   document.getElementById('bottom-nav').classList.add('hidden');
   document.getElementById('auth-section').classList.remove('hidden');
@@ -325,22 +332,45 @@ function fmtClock(s){
   let h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
   return bn(String(h).padStart(2,'0')) + ':' + bn(String(m).padStart(2,'0')) + ':' + bn(String(ss).padStart(2,'0'));
 }
+function tickTimer(){
+  secondsElapsed++;
+  document.getElementById('timer-text').innerText = fmtClock(secondsElapsed);
+  document.getElementById('stat-mins').innerText = bn(Math.floor(secondsElapsed/60)) + ' মিনিট';
+  let pct = Math.min(secondsElapsed/1800, 1);
+  document.getElementById('ring-fg').style.strokeDashoffset = 553 * (1 - pct);
+  document.getElementById('ring-label').innerText = pct >= 1 ? '🎉 আজকের লক্ষ্য পূরণ!' : 'আজকের লক্ষ্য: ৩০ মিনিট';
+}
+function runTimerInterval(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 1000);
+}
 function startTimer(){
   document.getElementById('start-btn').classList.add('hidden');
   document.getElementById('stop-btn').classList.remove('hidden');
   secondsElapsed = 0;
+  try{ localStorage.setItem('jobappfrnd_timer', JSON.stringify({start: Date.now()})); }catch(e){}
   document.getElementById('timer-text').innerText = fmtClock(0);
-  timerInterval = setInterval(()=>{
-    secondsElapsed++;
-    document.getElementById('timer-text').innerText = fmtClock(secondsElapsed);
-    document.getElementById('stat-mins').innerText = bn(Math.floor(secondsElapsed/60)) + ' মিনিট';
-    let pct = Math.min(secondsElapsed/1800, 1);
-    document.getElementById('ring-fg').style.strokeDashoffset = 553 * (1 - pct);
-    document.getElementById('ring-label').innerText = pct >= 1 ? '🎉 আজকের লক্ষ্য পূরণ!' : 'আজকের লক্ষ্য: ৩০ মিনিট';
-  }, 1000);
+  runTimerInterval();
+}
+// Refresh korle cholte thaka timer abar shuru hobe (12 ghontar beshi hole bad)
+function resumeTimer(){
+  let t = null;
+  try{ t = JSON.parse(localStorage.getItem('jobappfrnd_timer') || 'null'); }catch(e){}
+  if(!t || !t.start) return;
+  let elapsed = Math.floor((Date.now() - t.start)/1000);
+  if(elapsed <= 0 || elapsed > 12*3600){ try{ localStorage.removeItem('jobappfrnd_timer'); }catch(e){} return; }
+  secondsElapsed = elapsed;
+  document.getElementById('start-btn').classList.add('hidden');
+  document.getElementById('stop-btn').classList.remove('hidden');
+  document.getElementById('timer-text').innerText = fmtClock(secondsElapsed);
+  let pct = Math.min(secondsElapsed/1800, 1);
+  document.getElementById('ring-fg').style.strokeDashoffset = 553 * (1 - pct);
+  runTimerInterval();
+  toast('⏱️ টাইমার চলছিল — আবার শুরু হলো!');
 }
 async function stopTimer(){
   clearInterval(timerInterval);
+  try{ localStorage.removeItem('jobappfrnd_timer'); }catch(e){}
   document.getElementById('stop-btn').classList.add('hidden');
   document.getElementById('start-btn').classList.remove('hidden');
   if(secondsElapsed > 0 && currentUser){
@@ -483,6 +513,16 @@ async function loadAllData(){
       '<button class="btn violet sm" onclick="openPdfReader(\'' + esc(b.title) + '\', \'' + esc(b.link) + '\'); switchTab(\'docs\', document.querySelectorAll(\'#bottom-nav .nav-btn\')[2]);">বইটি পড়ো 📖</button></div>';
   });
 }
+// Refresh korle logout hobe na — save kora session diye abar login hobe
+(function restoreSession(){
+  let saved = null;
+  try{ saved = JSON.parse(localStorage.getItem('jobappfrnd_user') || 'null'); }catch(e){}
+  if(!saved || !saved.mobile) return;
+  api('/api/session?mobile=' + encodeURIComponent(saved.mobile)).then(d=>{
+    currentUser = d.user;
+    showDashboard();
+  }).catch(()=>{ try{ localStorage.removeItem('jobappfrnd_user'); }catch(e){} });
+})();
 </script>
 </body>
 </html>

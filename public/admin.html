@@ -306,6 +306,7 @@
         let p = document.getElementById('admin-pass').value.trim();
         try {
             await api('/api/admin/login', 'POST', { user: u, pass: p });
+            try{ localStorage.setItem('jobappfrnd_admin', '1'); }catch(e){}
             document.getElementById('admin-login-box').classList.add('hidden');
             document.getElementById('admin-dashboard').classList.remove('hidden');
             document.getElementById('admin-subtitle').innerText = 'কন্ট্রোল প্যানেল — স্বাগতম, এডমিন!';
@@ -314,6 +315,7 @@
     }
 
     function adminLogout() {
+        try{ localStorage.removeItem('jobappfrnd_admin'); }catch(e){}
         document.getElementById('admin-dashboard').classList.add('hidden');
         document.getElementById('admin-login-box').classList.remove('hidden');
         document.getElementById('admin-subtitle').innerText = 'সরকারি চাকরি প্রস্তুতি — কন্ট্রোল প্যানেল';
@@ -434,6 +436,17 @@
         try { await api('/api/admin/users/' + id, 'DELETE'); loadAdminUsers(); alert('বন্ধু সফলভাবে রিমুভ করা হয়েছে!'); }
         catch(e) { alert(e.message); }
     }
+
+    // Refresh korle logout hobe na — save kora admin session diye dashboard khulbe
+    (function restoreAdminSession(){
+        let ok = false;
+        try{ ok = localStorage.getItem('jobappfrnd_admin') === '1'; }catch(e){}
+        if(!ok) return;
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        document.getElementById('admin-subtitle').innerText = 'কন্ট্রোল প্যানেল — স্বাগতম, এডমিন!';
+        loadAdminUsers();
+    })();
 </script>
 </body>
 </html>
