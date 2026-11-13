@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobAppFrnd - সরকারি চাকরি প্রস্তুতি</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: #333; }
+        .container { max-width: 480px; margin: auto; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        header { background: #007bff; color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; }
+        .content { padding: 15px; flex: 1; overflow-y: auto; }
+        .hidden { display: none !important; }
+        input, select { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
+        button:hover { background: #0056b3; }
+        .card { background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #007bff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .nav-tabs { display: flex; background: #e9ecef; border-top: 1px solid #ddd; position: sticky; bottom: 0; }
+        .nav-tabs button { flex: 1; background: none; color: #495057; border: none; padding: 10px 4px; margin: 0; border-radius: 0; font-size: 0.8rem; font-weight: bold; }
+        .nav-tabs button.active { background: #007bff; color: white; }
+        .timer-display { font-size: 2.3rem; text-align: center; margin: 15px 0; font-weight: bold; color: #28a745; }
+        .rank-badge { background: #ffc107; color: #000; padding: 2px 8px; border-radius: 12px; font-weight: bold; font-size: 0.8rem; float: right; }
+        iframe { width: 100%; height: 350px; border: 1px solid #ccc; border-radius: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header id="user-header">JobAppFrnd - ইউজার লগইন / রেজিস্ট্রেশন</header>
+
+    <div class="content">
+        <!-- Auth Box -->
+        <div id="auth-section">
+            <div id="login-box">
+                <h3>বন্ধুদের লগইন</h3>
+                <input type="text" id="user-login-mobile" placeholder="মোবাইল নাম্বার">
+                <input type="password" id="user-login-pass" placeholder="পাসওয়ার্ড">
+                <button onclick="userLogin()">লগইন</button>
+                <p style="text-align: center; margin-top: 15px;">একাউন্ট নেই? <a href="#" onclick="toggleAuth(true)" style="color: #007bff;">রেজিস্ট্রেশন করুন</a></p>
+            </div>
+
+            <div id="reg-box" class="hidden">
+                <h3>নতুন একাউন্ট তৈরি</h3>
+                <input type="text" id="user-reg-name" placeholder="আপনার নাম">
+                <input type="text" id="user-reg-mobile" placeholder="মোবাইল নাম্বার">
+                <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড">
+                <button onclick="userRegister()">রেজিস্ট্রেশন</button>
+                <p style="text-align: center; margin-top: 15px;">আগেই একাউন্ট আছে? <a href="#" onclick="toggleAuth(false)" style="color: #007bff;">লগইন করুন</a></p>
+            </div>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="user-dashboard" class="hidden">
+            <div id="user-tab-content">
+                
+                <!-- 1. HOME & TIMER -->
+                <div class="user-sub-tab" id="ustub-home">
+                    <h4>📢 এডমিনের নোটিশ ও আইডিয়া</h4>
+                    <div id="user-notice-board"><div class="card">কোনো নোটিশ নেই।</div></div>
+
+                    <h4 style="margin-top: 15px;">⏱️ পড়ার টাইমার</h4>
+                    <div class="timer-display" id="timer-text">০০:০০:০০</div>
+                    <button id="start-btn" onclick="startTimer()" style="background: #28a745;">পড়া শুরু করুন (Start)</button>
+                    <button id="stop-btn" onclick="stopTimer()" class="hidden" style="background: #dc3545;">পড়া থামান ও সেভ করুন (Stop)</button>
+                    
+                    <div class="card" style="margin-top: 15px;">
+                        <strong>সারাজীবনের মোট পড়া:</strong>
+                        <p id="lifetime-study" style="font-size: 1.1rem; font-weight: bold; color: #007bff; margin: 5px 0 0 0;">০ মিনিট</p>
+                    </div>
+                </div>
+
+                <!-- 2. LEADERBOARD -->
+                <div class="user-sub-tab hidden" id="ustub-rank">
+                    <h3>🏆 বন্ধুদের লিডারবোর্ড</h3>
+                    <p style="font-size: 0.85rem; color: #666;">সর্বমোট পড়ার সময়ের ভিত্তিতে র‍্যাংকিং</p>
+                    <div id="leaderboard-list"></div>
+                </div>
+
+                <!-- 3. DOCUMENTS & PDF READER ROOM -->
+                <div class="user-sub-tab hidden" id="ustub-docs">
+                    <h3>📄 ডকুমেন্টস ও পিডিএফ পড়ার ঘর</h3>
+                    
+                    <div class="card" style="border-left-color: #28a745;">
+                        <strong>নতুন ডকুমেন্ট যোগ করুন</strong>
+                        <input type="text" id="doc-title" placeholder="ডকুমেন্টের নাম (যেমন: আবেদন কপি)">
+                        <input type="text" id="doc-link" placeholder="Google Drive বা PDF লিংক দিন">
+                        <button onclick="addUserDoc()" style="background: #28a745;">ডকুমেন্ট সেভ করুন</button>
+                    </div>
+
+                    <div id="pdf-reader-box" class="hidden card" style="border-left-color: #dc3545;">
+                        <strong id="reader-title">পিডিএফ রিডার</strong>
+                        <button onclick="closeReader()" style="background: #dc3545; padding: 5px; width: auto; float: right; margin: 0;">বন্ধ করুন ✖</button>
+                        <iframe id="pdf-frame" src=""></iframe>
+                    </div>
+
+                    <div id="docs-list"></div>
+                </div>
+
+                <!-- 4. BOOKS LIBRARY -->
+                <div class="user-sub-tab hidden" id="ustub-books">
+                    <h3>📚 গুরুত্বপূর্ণ বইয়ের তালিকা</h3>
+                    <div id="books-list"></div>
+                </div>
+
+                <!-- 5. PROFILE -->
+                <div class="user-sub-tab hidden" id="ustub-profile">
+                    <h3>👤 প্রোফাইল</h3>
+                    <div class="card">
+                        <p><strong>নাম:</strong> <span id="p-name"></span></p>
+                        <p><strong>মোবাইল:</strong> <span id="p-mobile"></span></p>
+                    </div>
+                    <button onclick="userLogout()" style="background: #dc3545; margin-top: 20px;">লগআউট</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div id="bottom-nav" class="nav-tabs hidden">
+        <button class="active" onclick="switchTab('home', this)">হোম</button>
+        <button onclick="switchTab('rank', this)">লিডারবোর্ড</button>
+        <button onclick="switchTab('docs', this)">পিডিএফ ঘর</button>
+        <button onclick="switchTab('books', this)">বইসমূহ</button>
+        <button onclick="switchTab('profile', this)">প্রোফাইল</button>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let timerInterval = null;
+    let secondsElapsed = 0;
+
+    async function api(path, method, body) {
+        const r = await fetch(path, { method: method || 'GET', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error || 'Server error');
+        return d;
+    }
+
+    function toggleAuth(isReg) {
+        document.getElementById('login-box').classList.toggle('hidden', isReg);
+        document.getElementById('reg-box').classList.toggle('hidden', !isReg);
+    }
+
+    async function userRegister() {
+        let name = document.getElementById('user-reg-name').value.trim();
+        let mobile = document.getElementById('user-reg-mobile').value.trim();
+        let pass = document.getElementById('user-reg-pass').value.trim();
+        if(!name || !mobile || !pass) { alert('সবগুলো ঘর পূরণ করুন!'); return; }
+        try { await api('/api/register', 'POST', { name, mobile, pass }); alert('রেজিস্ট্রেশন সফল! এখন লগইন করুন।'); toggleAuth(false); }
+        catch(e) { alert(e.message); }
+    }
+
+    async function userLogin() {
+        let mobile = document.getElementById('user-login-mobile').value.trim();
+        let pass = document.getElementById('user-login-pass').value.trim();
+        try {
+            const d = await api('/api/login', 'POST', { mobile, pass });
+            currentUser = d.user;
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('user-dashboard').classList.remove('hidden');
+            document.getElementById('bottom-nav').classList.remove('hidden');
+            document.getElementById('user-header').innerText = 'স্বাগতম, ' + currentUser.name;
+            document.getElementById('p-name').innerText = currentUser.name;
+            document.getElementById('p-mobile').innerText = currentUser.mobile;
+            updateTimeDisplay();
+            loadAllData();
+        } catch(e) { alert('মোবাইল নাম্বার বা পাসওয়ার্ড ভুল অথবা এডমিন আপনাকে রিমুভ করেছেন!'); }
+    }
+
+    function userLogout() {
+        currentUser = null;
+        document.getElementById('user-dashboard').classList.add('hidden');
+        document.getElementById('bottom-nav').classList.add('hidden');
+        document.getElementById('auth-section').classList.remove('hidden');
+        document.getElementById('user-header').innerText = 'JobAppFrnd - ইউজার লগইন / রেজিস্ট্রেশন';
+    }
+
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.user-sub-tab').forEach(el => el.classList.add('hidden'));
+        document.getElementById('ustub-' + tab).classList.remove('hidden');
+        btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadAllData();
+    }
+
+    function startTimer() {
+        document.getElementById('start-btn').classList.add('hidden');
+        document.getElementById('stop-btn').classList.remove('hidden');
+        secondsElapsed = 0;
+        timerInterval = setInterval(() => {
+            secondsElapsed++;
+            let h = Math.floor(secondsElapsed / 3600);
+            let m = Math.floor((secondsElapsed % 3600) / 60);
+            let s = secondsElapsed % 60;
+            document.getElementById('timer-text').innerText =
+                String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        }, 1000);
+    }
+
+    async function stopTimer() {
+        clearInterval(timerInterval);
+        document.getElementById('stop-btn').classList.add('hidden');
+        document.getElementById('start-btn').classList.remove('hidden');
+        if(secondsElapsed > 0 && currentUser) {
+            try {
+                const d = await api('/api/study/add', 'POST', { mobile: currentUser.mobile, seconds: secondsElapsed });
+                currentUser = d.user;
+                updateTimeDisplay();
+                alert('পড়ার সময় সফলভাবে সেভ হয়েছে!');
+            } catch(e) { alert('সেভ হয়নি: ' + e.message); }
+        }
+        secondsElapsed = 0;
+        document.getElementById('timer-text').innerText = "০০:০০:০০";
+    }
+
+    function updateTimeDisplay() {
+        let totalSecs = currentUser.studySeconds || 0;
+        let mins = Math.floor(totalSecs / 60);
+        let hrs = Math.floor(mins / 60);
+        let remMins = mins % 60;
+        document.getElementById('lifetime-study').innerText = hrs + " ঘণ্টা " + remMins + " মিনিট (" + totalSecs + " সেকেন্ড)";
+    }
+
+    async function addUserDoc() {
+        let title = document.getElementById('doc-title').value.trim();
+        let link = document.getElementById('doc-link').value.trim();
+        if(!title || !link) { alert('নাম ও লিংক দিন!'); return; }
+        try {
+            await api('/api/docs', 'POST', { title, link, addedBy: currentUser.name });
+            document.getElementById('doc-title').value = '';
+            document.getElementById('doc-link').value = '';
+            loadAllData();
+            alert('ডকুমেন্ট যুক্ত হয়েছে!');
+        } catch(e) { alert(e.message); }
+    }
+
+    function openPdfReader(title, link) {
+        let embedLink = link.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+        document.getElementById('reader-title').innerText = 'পড়ছেন: ' + title;
+        document.getElementById('pdf-frame').src = embedLink;
+        document.getElementById('pdf-reader-box').classList.remove('hidden');
+    }
+
+    function closeReader() {
+        document.getElementById('pdf-reader-box').classList.add('hidden');
+        document.getElementById('pdf-frame').src = '';
+    }
+
+    function esc(s){ return String(s).replace(/'/g, "\'").replace(/"/g, '&quot;'); }
+
+    async function loadAllData() {
+        let d;
+        try { d = await api('/api/data'); } catch(e) { return; }
+        let notices = d.notices || [];
+        let board = document.getElementById('user-notice-board');
+        board.innerHTML = notices.length ? '' : '<div class="card">কোনো নোটিশ নেই।</div>';
+        notices.forEach(n => board.innerHTML += `<div class="card">📢 ${n}</div>`);
+        let users = d.users || [];
+        let rankDiv = document.getElementById('leaderboard-list');
+        rankDiv.innerHTML = '';
+        users.forEach((u, i) => {
+            let mins = Math.floor((u.studySeconds || 0) / 60);
+            let hrs = Math.floor(mins / 60);
+            let remMins = mins % 60;
+            rankDiv.innerHTML += `
+                <div class="card">
+                    <span class="rank-badge">#${i + 1}</span>
+                    <strong>${u.name}</strong><br>
+                    <small>মোট পড়া: ${hrs} ঘণ্টা ${remMins} মিনিট (${u.studySeconds || 0} সেকেন্ড)</small>
+                </div>`;
+        });
+        let docs = d.docs || [];
+        let docsDiv = document.getElementById('docs-list');
+        docsDiv.innerHTML = docs.length ? '' : '<p>কোনো ডকুমেন্ট যোগ করা হয়নি।</p>';
+        docs.forEach(dd => {
+            docsDiv.innerHTML += `
+                <div class="card">
+                    <strong>📄 ${dd.title}</strong><br>
+                    <small>যোগ করেছেন: ${dd.addedBy}</small>
+                    <button onclick="openPdfReader('${esc(dd.title)}', '${esc(dd.link)}')" style="background: #17a2b8; padding: 6px;">অ্যাপের ভেতরে পড়ুন 📖</button>
+                </div>`;
+        });
+        let books = d.books || [];
+        let booksDiv = document.getElementById('books-list');
+        booksDiv.innerHTML = books.length ? '' : '<p>এডমিন এখনো কোনো বই যোগ করেননি।</p>';
+        books.forEach(b => {
+            booksDiv.innerHTML += `
+                <div class="card" style="border-left-color: #6f42c1;">
+                    <strong>📚 ${b.title}</strong><br>
+                    <small>লেখক/বিষয়: ${b.author}</small>
+                    <button onclick="openPdfReader('${esc(b.title)}', '${esc(b.link)}'); switchTab('docs', document.querySelectorAll('#bottom-nav button')[2]);" style="background: #6f42c1; padding: 6px;">বইটি পড়ুন 📖</button>
+                </div>`;
+        });
+    }
+</script>
+</body>
+</html>

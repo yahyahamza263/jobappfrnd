@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobAppFrnd Admin - সরকারি চাকরি প্রস্তুতি</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; color: #333; }
+        .container { max-width: 480px; margin: auto; background: #fff; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        header { background: #dc3545; color: white; padding: 15px; text-align: center; font-size: 1.2rem; font-weight: bold; }
+        .content { padding: 15px; flex: 1; overflow-y: auto; }
+        .hidden { display: none !important; }
+        input, textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; background: #dc3545; color: white; border: none; padding: 10px; border-radius: 5px; font-size: 0.95rem; cursor: pointer; margin-top: 8px; }
+        .card { background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header id="admin-header">JobAppFrnd Admin - প্যানেল লগইন</header>
+
+    <div class="content">
+        <!-- Admin Login -->
+        <div id="admin-login-box">
+            <h3>এডমিন সিক্রেট লগইন</h3>
+            <input type="text" id="admin-user" placeholder="এডমিন ইউজারনেম (admin)">
+            <input type="password" id="admin-pass" placeholder="পাসওয়ার্ড (1234)">
+            <button onclick="adminLogin()">প্রবেশ করুন</button>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-dashboard" class="hidden">
+            
+            <!-- Post Idea -->
+            <div class="card">
+                <h4>📢 নতুন আইডিয়া বা নোটিশ পোস্ট করুন</h4>
+                <textarea id="admin-idea-text" placeholder="এখানে নতুন আইডিয়া বা নোটিশ লিখুন..."></textarea>
+                <button onclick="postIdea()">পোস্ট করুন</button>
+            </div>
+
+            <!-- Add Book -->
+            <div class="card" style="border-left-color: #6f42c1;">
+                <h4>📚 নতুন বই যোগ করুন</h4>
+                <input type="text" id="book-title" placeholder="বইয়ের নাম (যেমন: এমপিথ্রি বাংলা)">
+                <input type="text" id="book-author" placeholder="লেখক বা প্রকাশনী">
+                <input type="text" id="book-link" placeholder="বইয়ের PDF বা Google Drive লিংক">
+                <button onclick="addBook()" style="background: #6f42c1;">বই যোগ করুন</button>
+            </div>
+
+            <!-- Add Document -->
+            <div class="card" style="border-left-color: #17a2b8;">
+                <h4>📄 সরকারি চাকরির ডকুমেন্ট / সার্কুলার যোগ</h4>
+                <input type="text" id="admin-doc-title" placeholder="ডকুমেন্টের নাম">
+                <input type="text" id="admin-doc-link" placeholder="PDF বা Drive লিংক">
+                <button onclick="addAdminDoc()" style="background: #17a2b8;">ডকুমেন্ট যোগ করুন</button>
+            </div>
+
+            <!-- Add New Friend -->
+            <div class="card" style="border-left-color: #28a745;">
+                <h4>➕ নতুন বন্ধু যুক্ত করুন (Add User)</h4>
+                <input type="text" id="new-u-name" placeholder="বন্ধুর নাম">
+                <input type="text" id="new-u-mobile" placeholder="মোবাইল নাম্বার">
+                <input type="password" id="new-u-pass" placeholder="পাসওয়ার্ড">
+                <button onclick="addNewUser()" style="background: #28a745;">বন্ধু অ্যাড করুন</button>
+            </div>
+
+            <h3>👥 বন্ধুদের তালিকা ও রিমুভ অপশন</h3>
+            <div id="admin-user-list"></div>
+            
+            <button onclick="adminLogout()" style="background: #6c757d; margin-top: 25px;">লগআউট</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function api(path, method, body) {
+        const r = await fetch(path, { method: method || 'GET', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error || 'Server error');
+        return d;
+    }
+
+    async function adminLogin() {
+        let u = document.getElementById('admin-user').value.trim();
+        let p = document.getElementById('admin-pass').value.trim();
+        try {
+            await api('/api/admin/login', 'POST', { user: u, pass: p });
+            document.getElementById('admin-login-box').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            document.getElementById('admin-header').innerText = 'JobAppFrnd - এডমিন কন্ট্রোল প্যানেল';
+            loadAdminUsers();
+        } catch(e) { alert('ভুল ইউজারনেম বা পাসওয়ার্ড!'); }
+    }
+
+    function adminLogout() {
+        document.getElementById('admin-dashboard').classList.add('hidden');
+        document.getElementById('admin-login-box').classList.remove('hidden');
+        document.getElementById('admin-header').innerText = 'JobAppFrnd Admin - প্যানেল লগইন';
+    }
+
+    async function postIdea() {
+        let text = document.getElementById('admin-idea-text').value.trim();
+        if(!text) return;
+        try { await api('/api/notices', 'POST', { text }); document.getElementById('admin-idea-text').value = ''; alert('সফলভাবে নোটিশ পোস্ট করা হয়েছে!'); }
+        catch(e) { alert(e.message); }
+    }
+
+    async function addBook() {
+        let title = document.getElementById('book-title').value.trim();
+        let author = document.getElementById('book-author').value.trim();
+        let link = document.getElementById('book-link').value.trim();
+        if(!title || !link) { alert('বইয়ের নাম ও লিংক দিন!'); return; }
+        try {
+            await api('/api/books', 'POST', { title, author, link });
+            document.getElementById('book-title').value = '';
+            document.getElementById('book-author').value = '';
+            document.getElementById('book-link').value = '';
+            alert('বই সফলভাবে লাইব্রেরিতে যুক্ত হয়েছে!');
+        } catch(e) { alert(e.message); }
+    }
+
+    async function addAdminDoc() {
+        let title = document.getElementById('admin-doc-title').value.trim();
+        let link = document.getElementById('admin-doc-link').value.trim();
+        if(!title || !link) { alert('ডকুমেন্টের নাম ও লিংক দিন!'); return; }
+        try {
+            await api('/api/docs', 'POST', { title, link, addedBy: 'Admin' });
+            document.getElementById('admin-doc-title').value = '';
+            document.getElementById('admin-doc-link').value = '';
+            alert('ডকুমেন্ট সফলভাবে যুক্ত হয়েছে!');
+        } catch(e) { alert(e.message); }
+    }
+
+    async function addNewUser() {
+        let name = document.getElementById('new-u-name').value.trim();
+        let mobile = document.getElementById('new-u-mobile').value.trim();
+        let pass = document.getElementById('new-u-pass').value.trim();
+        if(!name || !mobile || !pass) { alert('সবগুলো ঘর পূরণ করুন!'); return; }
+        try {
+            await api('/api/register', 'POST', { name, mobile, pass });
+            document.getElementById('new-u-name').value = '';
+            document.getElementById('new-u-mobile').value = '';
+            document.getElementById('new-u-pass').value = '';
+            loadAdminUsers();
+            alert('নতুন বন্ধু সফলভাবে অ্যাড করা হয়েছে!');
+        } catch(e) { alert(e.message); }
+    }
+
+    async function loadAdminUsers() {
+        let d;
+        try { d = await api('/api/admin/users'); } catch(e) { return; }
+        let users = d.users || [];
+        let listDiv = document.getElementById('admin-user-list');
+        listDiv.innerHTML = users.length ? '' : '<p>কোনো বন্ধু নেই।</p>';
+        users.forEach((u) => {
+            let mins = Math.floor((u.studySeconds || 0) / 60);
+            listDiv.innerHTML += `
+                <div class="card">
+                    <strong>${u.name}</strong> (${u.mobile})<br>
+                    মোট পড়া: ${mins} মিনিট (${u.studySeconds || 0} সেকেন্ড)<br>
+                    <button onclick="removeUser(${u.id})" style="background: #dc3545; padding: 5px; margin-top: 5px; width: auto;">রিমুভ করুন</button>
+                </div>`;
+        });
+    }
+
+    async function removeUser(id) {
+        if(!confirm('এই বন্ধুকে রিমুভ করবেন?')) return;
+        try { await api('/api/admin/users/' + id, 'DELETE'); loadAdminUsers(); alert('বন্ধু সফলভাবে রিমুভ করা হয়েছে!'); }
+        catch(e) { alert(e.message); }
+    }
+</script>
+</body>
+</html>
