@@ -108,7 +108,7 @@ select option{background:#141a36;color:#f2f4ff}
 .upload-prog{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:10px}
 .upload-prog i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#22d3ee,#a78bfa);border-radius:99px;transition:width .3s}
 .reader-box{border-left:4px solid #ff5e6c}
-.reader-box iframe{width:100%;height:380px;border:1px solid rgba(255,255,255,.14);border-radius:12px;margin-top:10px;background:#fff}
+.reader-box iframe{width:100%;height:520px;border:1px solid rgba(255,255,255,.14);border-radius:12px;margin-top:10px;background:#fff}
 .chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;margin-top:6px}
 .chip.pdf{background:rgba(34,211,238,.16);color:#67e8f9}
 .chip.link{background:rgba(167,139,250,.16);color:#c4b5fd}
@@ -437,9 +437,9 @@ async function uploadPdf(){
 function openPdfReader(title, link){
   let embedLink;
   if(link.includes('/api/pdfs/')){
-    // Upload kora file (book/document) — WebView e sorasori PDF khole na, tai Viewer diye
-    const abs = link.startsWith('http') ? link : location.origin + link;
-    embedLink = 'https://docs.google.com/gview?embedded=1&url=' + encodeURIComponent(abs);
+    // Upload kora file (book/document) — nijer PDF.js viewer diye khola hobe (WebView e chole, Google lage na)
+    const rel = link.startsWith('http') ? link.replace(location.origin, '') : link;
+    embedLink = '/pdfjs/viewer.html?file=' + encodeURIComponent(rel);
   } else {
     // Google Drive view link -> preview link
     embedLink = link.replace('/view?usp=sharing','/preview').replace('/view','/preview');
@@ -450,11 +450,11 @@ function openPdfReader(title, link){
   document.getElementById('pdf-reader-box').scrollIntoView({behavior:'smooth'});
 }
 function openPdfFile(id, title){
-  // Android WebView er iframe e sorasori PDF khole na (WebView er nijer PDF viewer nei) —
-  // tai Google Docs Viewer diye khola hocche, eta WebView + browser — duijaygatei chole।
-  const fileUrl = location.origin + '/api/pdfs/' + id + '/file';
+  // Android WebView er iframe e sorasori PDF khole na (WebView er nijer PDF viewer nei),
+  // Google Docs Viewer o WebView e block hoy (ERR_BLOCKED_BY_RESPONSE) —
+  // tai nijer PDF.js viewer (public/pdfjs/) diye khola hocche, eta WebView + browser — duijaygatei chole।
   document.getElementById('reader-title').innerText = 'পড়ছো: ' + title;
-  document.getElementById('pdf-frame').src = 'https://docs.google.com/gview?embedded=1&url=' + encodeURIComponent(fileUrl);
+  document.getElementById('pdf-frame').src = '/pdfjs/viewer.html?file=' + encodeURIComponent('/api/pdfs/' + id + '/file');
   document.getElementById('pdf-reader-box').classList.remove('hidden');
   document.getElementById('pdf-reader-box').scrollIntoView({behavior:'smooth'});
 }
