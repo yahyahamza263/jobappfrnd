@@ -104,6 +104,17 @@ app.post('/api/login', async (req, res) => {
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
 
+// ---- Session restore (refresh/logout fix): validates a stored mobile ----
+app.get('/api/session', async (req, res) => {
+  try {
+    const mobile = String(req.query.mobile || '').trim();
+    if (!mobile) return res.status(400).json({ error: 'mobile needed' });
+    const r = await db.execute({ sql: 'SELECT * FROM users WHERE mobile = ?', args: [mobile] });
+    if (!r.rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json({ ok: true, user: publicUser(r.rows[0]) });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
 // ---- Admin login ----
 app.post('/api/admin/login', (req, res) => {
   const { user, pass } = req.body || {};
