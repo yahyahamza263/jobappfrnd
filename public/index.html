@@ -47,6 +47,9 @@ select option{background:#141a36;color:#f2f4ff}
 .seg-btn.active{background:#c8f542;color:#131602;box-shadow:0 4px 16px rgba(200,245,66,.4)}
 .auth-card{text-align:left}
 .auth-card h2{margin:0 0 6px}
+.otp-row{display:flex;gap:8px;align-items:center}
+.otp-row input{flex:1;min-width:0}
+.otp-btn{width:auto !important;flex:none;margin-top:0 !important;padding:12px 13px !important;font-size:13px !important;white-space:nowrap}
 .link{color:#7dd3fc;cursor:pointer;text-decoration:underline}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 4px 6px}
 .me{display:flex;gap:10px;align-items:center}
@@ -150,9 +153,11 @@ select option{background:#141a36;color:#f2f4ff}
       <h2>নতুন অ্যাকাউন্ট ✨</h2>
       <p class="muted">নাম, Gmail আর ফোন নম্বর দিয়ে অ্যাকাউন্ট খুলো।</p>
       <input type="text" id="user-reg-name" placeholder="তোমার নাম">
-      <input type="email" id="user-reg-email" placeholder="Gmail ঠিকানা" inputmode="email">
+      <div class="otp-row">
+        <input type="email" id="user-reg-email" placeholder="Gmail ঠিকানা" inputmode="email">
+        <button class="btn primary otp-btn" onclick="requestOtp()">📧 Send OTP</button>
+      </div>
       <input type="text" id="user-reg-mobile" placeholder="ফোন নম্বর" inputmode="tel">
-      <button class="btn primary" onclick="requestOtp()">📧 Gmail এ OTP পাঠাও</button>
       <p class="tiny muted center hidden" id="otp-sent-note" style="margin:8px 0 0">OTP গেছে <b id="otp-sent-to">—</b> এ। মেইল চেক করো (Spam/Promotions ও দেখো)।</p>
       <input type="text" id="user-reg-otp" placeholder="৬ সংখ্যার OTP" inputmode="numeric" maxlength="6">
       <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড (কমপক্ষে ৪ অক্ষর)">
@@ -311,7 +316,7 @@ async function userRegister(){
   let code = document.getElementById('user-reg-otp').value.trim();
   let pass = document.getElementById('user-reg-pass').value.trim();
   if(!name || !code || !pass){ toast('সবগুলো ঘর পূরণ করো!'); return; }
-  if(!otpEmail){ toast('আগে "Gmail এ OTP পাঠাও" চাপো!'); return; }
+  if(!otpEmail){ toast('আগে "Send OTP" চাপো!'); return; }
   try{
     const d = await api('/api/auth/signup/verify','POST',{email: otpEmail, code, name, pass, mobile: otpMobile});
     currentUser = d.user;
