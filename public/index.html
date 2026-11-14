@@ -140,19 +140,27 @@ select option{background:#141a36;color:#f2f4ff}
     </div>
     <div class="card auth-card" id="login-box">
       <h2>স্বাগতম 👋</h2>
-      <p class="muted">মোবাইল নম্বর আর পাসওয়ার্ড দিয়ে লগইন করো।</p>
-      <input type="text" id="user-login-mobile" placeholder="মোবাইল নম্বর" inputmode="numeric">
+      <p class="muted">Gmail বা মোবাইল নম্বর আর পাসওয়ার্ড দিয়ে লগইন করো।</p>
+      <input type="text" id="user-login-mobile" placeholder="Gmail বা মোবাইল নম্বর">
       <input type="password" id="user-login-pass" placeholder="পাসওয়ার্ড">
       <button class="btn primary" onclick="userLogin()">লগইন 🚀</button>
       <p class="tiny muted center" style="margin-top:14px">অ্যাকাউন্ট নেই? <span class="link" onclick="toggleAuth(true)">রেজিস্ট্রেশন করো</span></p>
     </div>
     <div class="card auth-card hidden" id="reg-box">
       <h2>নতুন অ্যাকাউন্ট ✨</h2>
-      <p class="muted">নাম, মোবাইল আর পাসওয়ার্ড দিলেই হয়ে যাবে।</p>
+      <p class="muted">Gmail দিয়ে OTP ভেরিফাই করে অ্যাকাউন্ট খুলো।</p>
       <input type="text" id="user-reg-name" placeholder="তোমার নাম">
-      <input type="text" id="user-reg-mobile" placeholder="মোবাইল নম্বর" inputmode="numeric">
-      <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড">
-      <button class="btn primary" onclick="userRegister()">অ্যাকাউন্ট তৈরি করো 🎉</button>
+      <input type="email" id="user-reg-email" placeholder="Gmail ঠিকানা" inputmode="email">
+      <div id="otp-step-1">
+        <button class="btn primary" onclick="requestOtp()">📧 Gmail এ OTP পাঠাও</button>
+      </div>
+      <div id="otp-step-2" class="hidden">
+        <p class="muted" style="margin:4px 0">OTP গেছে <b id="otp-sent-to">—</b> এ। মেইল চেক করো (Spam/Promotions ও দেখো)।</p>
+        <input type="text" id="user-reg-otp" placeholder="৬ সংখ্যার OTP" inputmode="numeric" maxlength="6">
+        <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড (কমপক্ষে ৪ অক্ষর)">
+        <button class="btn primary" onclick="userRegister()">OTP যাচাই করে অ্যাকাউন্ট তৈরি করো 🎉</button>
+        <p class="tiny muted center" style="margin-top:12px">OTP আসেনি? <span class="link" onclick="requestOtp(true)">আবার পাঠাও</span></p>
+      </div>
       <p class="tiny muted center" style="margin-top:14px">আগেই অ্যাকাউন্ট আছে? <span class="link" onclick="toggleAuth(false)">লগইন করো</span></p>
     </div>
   </div>
@@ -238,6 +246,7 @@ select option{background:#141a36;color:#f2f4ff}
       <p class="muted" style="margin:0">JobAppFrnd পরিবারের সদস্য 🌟</p>
     </div>
     <div class="card">
+      <div class="kv"><span class="muted">✉️ Gmail</span><b id="p-email">—</b></div>
       <div class="kv"><span class="muted">📱 মোবাইল</span><b id="p-mobile">—</b></div>
       <div class="kv"><span class="muted">⏱️ মোট পড়া</span><b id="p-total">—</b></div>
       <div class="kv"><span class="muted">🏆 র‍্যাংক</span><b id="p-rank">—</b></div>
@@ -282,23 +291,43 @@ function toggleAuth(isReg){
   document.getElementById('seg-login').classList.toggle('active', !isReg);
   document.getElementById('seg-reg').classList.toggle('active', isReg);
 }
+let otpEmail = '';
+async function requestOtp(){
+  let name = document.getElementById('user-reg-name').value.trim();
+  let email = document.getElementById('user-reg-email').value.trim();
+  if(!name){ toast('নাম লিখো!'); return; }
+  if(!email || !email.includes('@')){ toast('সঠিক Gmail ঠিকানা দিন!'); return; }
+  try{
+    await api('/api/auth/signup/request-otp','POST',{email});
+    otpEmail = email;
+    document.getElementById('otp-sent-to').innerText = email;
+    document.getElementById('otp-step-1').classList.add('hidden');
+    document.getElementById('otp-step-2').classList.remove('hidden');
+    toast('OTP পাঠানো হয়েছে! Gmail চেক করো 📧');
+  }catch(e){ toast(e.message); }
+}
 async function userRegister(){
   let name = document.getElementById('user-reg-name').value.trim();
-  let mobile = document.getElementById('user-reg-mobile').value.trim();
+  let code = document.getElementById('user-reg-otp').value.trim();
   let pass = document.getElementById('user-reg-pass').value.trim();
-  if(!name || !mobile || !pass){ toast('সবগুলো ঘর পূরণ করো!'); return; }
-  try{ await api('/api/register','POST',{name,mobile,pass}); toast('রেজিস্ট্রেশন সফল! এখন লগইন করো। 🎉'); toggleAuth(false); }
-  catch(e){ toast(e.message); }
+  if(!name || !code || !pass){ toast('সবগুলো ঘর পূরণ করো!'); return; }
+  try{
+    const d = await api('/api/auth/signup/verify','POST',{email: otpEmail, code, name, pass});
+    currentUser = d.user;
+    try{ localStorage.setItem('jobappfrnd_user', JSON.stringify({name: currentUser.name, email: currentUser.email, mobile: currentUser.mobile})); }catch(e){}
+    toast('অ্যাকাউন্ট তৈরি হয়েছে! স্বাগতম 🎉');
+    showDashboard();
+  }catch(e){ toast(e.message); }
 }
 async function userLogin(){
-  let mobile = document.getElementById('user-login-mobile').value.trim();
+  let id = document.getElementById('user-login-mobile').value.trim();
   let pass = document.getElementById('user-login-pass').value.trim();
   try{
-    const d = await api('/api/login','POST',{mobile,pass});
+    const d = await api('/api/login','POST',{email: id, pass});
     currentUser = d.user;
-    try{ localStorage.setItem('jobappfrnd_user', JSON.stringify({name: currentUser.name, mobile: currentUser.mobile})); }catch(e){}
+    try{ localStorage.setItem('jobappfrnd_user', JSON.stringify({name: currentUser.name, email: currentUser.email, mobile: currentUser.mobile})); }catch(e){}
     showDashboard();
-  }catch(e){ toast('মোবাইল নম্বর বা পাসওয়ার্ড ভুল!'); }
+  }catch(e){ toast('Gmail/মোবাইল বা পাসওয়ার্ড ভুল!'); }
 }
 function showDashboard(){
   document.getElementById('auth-section').classList.add('hidden');
@@ -308,7 +337,8 @@ function showDashboard(){
   document.getElementById('me-avatar').innerText = initial(currentUser.name);
   document.getElementById('p-avatar').innerText = initial(currentUser.name);
   document.getElementById('p-name').innerText = currentUser.name;
-  document.getElementById('p-mobile').innerText = currentUser.mobile;
+  document.getElementById('p-email').innerText = currentUser.email || '—';
+  document.getElementById('p-mobile').innerText = currentUser.mobile || '—';
   updateTimeDisplay();
   loadAllData();
   resumeTimer();
@@ -375,7 +405,7 @@ async function stopTimer(){
   document.getElementById('start-btn').classList.remove('hidden');
   if(secondsElapsed > 0 && currentUser){
     try{
-      const d = await api('/api/study/add','POST',{mobile: currentUser.mobile, seconds: secondsElapsed});
+      const d = await api('/api/study/add','POST',{email: currentUser.email, mobile: currentUser.mobile, seconds: secondsElapsed});
       currentUser = d.user;
       updateTimeDisplay();
       toast('পড়ার সময় সেভ হয়েছে! 🎉');
@@ -388,7 +418,7 @@ async function stopTimer(){
 }
 function myRank(){
   if(!currentUser) return null;
-  const i = allUsers.findIndex(u=>u.mobile === currentUser.mobile);
+  const i = allUsers.findIndex(u=>u.id === currentUser.id);
   return i === -1 ? null : i + 1;
 }
 function updateTimeDisplay(){
@@ -491,7 +521,7 @@ async function loadAllData(){
   let rankDiv = document.getElementById('leaderboard-list');
   rankDiv.innerHTML = allUsers.length ? '' : '<p class="muted center">এখনো কেউ পড়া শুরু করেনি।</p>';
   allUsers.forEach((u, i)=>{
-    const me = currentUser && u.mobile === currentUser.mobile;
+    const me = currentUser && u.id === currentUser.id;
     rankDiv.innerHTML += '<div class="row' + (me?' me-row':'') + '">' +
       '<div class="rank">' + bn(i+1) + '</div>' +
       '<div class="avatar">' + esc(initial(u.name)) + '</div>' +
@@ -528,8 +558,9 @@ async function loadAllData(){
 (function restoreSession(){
   let saved = null;
   try{ saved = JSON.parse(localStorage.getItem('jobappfrnd_user') || 'null'); }catch(e){}
-  if(!saved || !saved.mobile) return;
-  api('/api/session?mobile=' + encodeURIComponent(saved.mobile)).then(d=>{
+  if(!saved || (!saved.email && !saved.mobile)) return;
+  const q = saved.email ? 'email=' + encodeURIComponent(saved.email) : 'mobile=' + encodeURIComponent(saved.mobile);
+  api('/api/session?' + q).then(d=>{
     currentUser = d.user;
     showDashboard();
   }).catch(()=>{ try{ localStorage.removeItem('jobappfrnd_user'); }catch(e){} });
