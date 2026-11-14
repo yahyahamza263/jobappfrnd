@@ -302,26 +302,6 @@
                 <div id="pdf-list"></div>
             </div>
 
-            <!-- DOCS -->
-            <div class="admin-section hidden" id="sec-docs">
-                <div class="card accent-cyan">
-                    <div class="card-head">
-                        <div class="icon-badge">📄</div>
-                        <div><h4>ডকুমেন্ট / সার্কুলার যোগ করুন</h4><p class="card-hint">ফাইল থেকে PDF দিয়ে ডকুমেন্ট যোগ করুন।</p></div>
-                    </div>
-                    <input type="text" id="admin-doc-title" placeholder="ডকুমেন্টের নাম">
-                    <label class="file-picker" for="doc-pdf-file" style="border-color:rgba(45,212,191,.55); background:rgba(45,212,191,.07);">📄 পিডিএফ ফাইল বেছে নিন</label>
-                    <input type="file" id="doc-pdf-file" accept="application/pdf" class="hidden">
-                    <div class="file-name" id="doc-pdf-file-name"></div>
-                    <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF — নাম উপরের ঘরেই লিখুন</p>
-                    <button class="btn-cyan" onclick="uploadDocPdf()">📤 PDF ফাইল দিয়ে ডকুমেন্ট যোগ করুন</button>
-                    <div class="upload-status" id="doc-pdf-status"></div>
-                </div>
-                <h4 class="list-title">📃 ডকুমেন্টের তালিকা</h4>
-                <p class="list-sub">যোগ করা ডকুমেন্ট।</p>
-                <div id="doc-list"></div>
-            </div>
-
             <!-- USERS -->
             <div class="admin-section hidden" id="sec-users">
                 <h3 class="section-title" style="margin-top:6px;">👥 বন্ধুদের তালিকা</h3>
@@ -340,7 +320,6 @@
     <button class="nav-btn active" data-sec="notice" onclick="showSection('notice', this)"><span>📢</span><label>নোটিশ</label></button>
     <button class="nav-btn" data-sec="books" onclick="showSection('books', this)"><span>📚</span><label>বই</label></button>
     <button class="nav-btn" data-sec="pdfs" onclick="showSection('pdfs', this)"><span>📄</span><label>পিডিএফ</label></button>
-    <button class="nav-btn" data-sec="docs" onclick="showSection('docs', this)"><span>📃</span><label>ডকুমেন্ট</label></button>
     <button class="nav-btn" data-sec="users" onclick="showSection('users', this)"><span>👥</span><label>বন্ধু</label></button>
 </div>
 
@@ -424,14 +403,10 @@
         }
     }
 
-    // Book + Doc file picker: show chosen file name
+    // Book file picker: show chosen file name
     document.getElementById('book-pdf-file').addEventListener('change', function() {
         let f = this.files && this.files[0];
         document.getElementById('book-pdf-file-name').innerText = f ? '📄 ' + f.name : '';
-    });
-    document.getElementById('doc-pdf-file').addEventListener('change', function() {
-        let f = this.files && this.files[0];
-        document.getElementById('doc-pdf-file-name').innerText = f ? '📄 ' + f.name : '';
     });
 
     function validPdfFile(file){
@@ -475,34 +450,6 @@
             document.getElementById('book-author').value = '';
             fileInput.value = '';
             document.getElementById('book-pdf-file-name').innerText = '';
-            loadAdminContent();
-        } catch(e) {
-            status.innerText = '❌ ' + (e.message || 'আপলোড হয়নি! আবার চেষ্টা করুন।');
-            status.className = 'upload-status err';
-        }
-    }
-
-    // ডকুমেন্ট: PDF ফাইল আপলোড → তারপর ডকুমেন্টের লিংক হিসেবে Turso ফাইল যোগ
-    async function uploadDocPdf() {
-        let status = document.getElementById('doc-pdf-status');
-        let title = document.getElementById('admin-doc-title').value.trim();
-        let fileInput = document.getElementById('doc-pdf-file');
-        let file = fileInput.files && fileInput.files[0];
-        status.className = 'upload-status';
-        if(!title) { status.innerText = 'আগে ডকুমেন্টের নাম লিখুন!'; status.classList.add('err'); return; }
-        let ferr = validPdfFile(file);
-        if(ferr) { status.innerText = ferr; status.classList.add('err'); return; }
-        status.innerText = 'আপলোড হচ্ছে…';
-        status.classList.add('busy');
-        try {
-            let pdf = await uploadPdfToTurso(title, file);
-            let link = location.origin + '/api/pdfs/' + pdf.id + '/file';
-            await api('/api/docs', 'POST', { title, link, addedBy: 'Admin' });
-            status.innerText = '✅ ডকুমেন্ট সফলভাবে যোগ হয়েছে!';
-            status.className = 'upload-status ok';
-            document.getElementById('admin-doc-title').value = '';
-            fileInput.value = '';
-            document.getElementById('doc-pdf-file-name').innerText = '';
             loadAdminContent();
         } catch(e) {
             status.innerText = '❌ ' + (e.message || 'আপলোড হয়নি! আবার চেষ্টা করুন।');
@@ -568,13 +515,6 @@
         pdfs.forEach(p=>{
             pl.innerHTML += '<div class="item-row"><div class="item-ic">📄</div><div class="item-info"><strong>' + esc(p.title) + '</strong><small>' + esc(p.filename || '') + ' • ' + fmtSize(p.size) + ' • ' + esc(p.addedBy || '') + '</small></div><button class="btn-red btn-small" onclick="deletePdf(' + p.id + ')">মুছুন</button></div>';
         });
-        // Docs (links)
-        let docs = d.docs || [];
-        let dl = document.getElementById('doc-list');
-        dl.innerHTML = docs.length ? '' : '<p class="empty-note">কোনো ডকুমেন্ট যোগ করা হয়নি।</p>';
-        docs.forEach(dd=>{
-            dl.innerHTML += '<div class="item-row"><div class="item-ic">📃</div><div class="item-info"><strong>' + esc(dd.title) + '</strong><small>যোগ করেছেন: ' + esc(dd.addedBy || '') + '</small></div><button class="btn-red btn-small" onclick="deleteDoc(' + dd.id + ')">মুছুন</button></div>';
-        });
         // Notices (id সহ — /api/notices থেকে; না পেলে /api/data থেকে শুধু দেখাবে)
         let nl = document.getElementById('notice-list');
         let notices = null;
@@ -608,12 +548,6 @@
     async function deletePdf(id){
         if(!confirm('এই পিডিএফটি মুছে ফেলবেন?')) return;
         try{ await api('/api/pdfs/' + id, 'DELETE'); loadAdminContent(); alert('পিডিএফ মুছে ফেলা হয়েছে!'); }
-        catch(e){ alert(e.message); }
-    }
-
-    async function deleteDoc(id){
-        if(!confirm('এই ডকুমেন্টটি মুছে ফেলবেন?')) return;
-        try{ await api('/api/docs/' + id, 'DELETE'); loadAdminContent(); alert('ডকুমেন্ট মুছে ফেলা হয়েছে!'); }
         catch(e){ alert(e.message); }
     }
 
