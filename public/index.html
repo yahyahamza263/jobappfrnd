@@ -258,9 +258,20 @@ select option{background:#0e2a32;color:#f2f4ff}
     <button class="btn primary" onclick="closeWelcome()">চলো শুরু করি 🚀</button>
   </div>
 </div>
+<!-- Notice popup — admin notice dile user er kase popup hisabe asbe -->
+<div id="notice-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <button class="modal-x" onclick="closeNotice()">✕</button>
+    <div class="modal-emoji">📢</div>
+    <h3>এডমিনের নোটিশ</h3>
+    <p id="notice-modal-text"></p>
+    <button class="btn primary" onclick="closeNotice()">ঠিক আছে 👍</button>
+  </div>
+</div>
 <script>
 let currentUser = null;
 let timerInterval = null;
+let pollInterval = null;
 let secondsElapsed = 0;
 let allUsers = [];
 function toast(msg){
@@ -342,6 +353,9 @@ function showDashboard(){
   loadAllData();
   resumeTimer();
   maybeShowWelcome();
+  checkNotices();
+  if(pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(pollUpdates, 30000);
 }
 function maybeShowWelcome(){
   try{ if(localStorage.getItem('jobappfrnd_welcomed')) return; }catch(e){ return; }
@@ -351,12 +365,56 @@ function maybeShowWelcome(){
 function closeWelcome(){
   document.getElementById('welcome-modal').classList.add('hidden');
 }
+
+// ---- notice popup: notun notice ashle ekbar popup dekhabe ----
+let noticeIds = [];
+function getSeenNotices(){ try{ return JSON.parse(localStorage.getItem('jobappfrnd_seen_notices') || '[]'); }catch(e){ return []; } }
+function markNoticesSeen(ids){ try{ localStorage.setItem('jobappfrnd_seen_notices', JSON.stringify(ids)); }catch(e){} }
+async function checkNotices(){
+  if(!currentUser) return;
+  if(!document.getElementById('welcome-modal').classList.contains('hidden')) return;
+  if(!document.getElementById('notice-modal').classList.contains('hidden')) return;
+  let d;
+  try{ d = await api('/api/notices'); }catch(e){ return; }
+  let list = d.notices || [];
+  if(!list.length) return;
+  noticeIds = list.map(n => n.id);
+  let seen = getSeenNotices();
+  let latest = list[0];
+  if(seen.includes(latest.id)) return;
+  document.getElementById('notice-modal-text').innerText = latest.text;
+  document.getElementById('notice-modal').classList.remove('hidden');
+}
+function closeNotice(){
+  document.getElementById('notice-modal').classList.add('hidden');
+  markNoticesSeen(noticeIds);
+}
+
+// ---- 30s por por: session check (account muche felle logout) + notun data/notice ----
+async function pollUpdates(){
+  if(!currentUser) return;
+  try{
+    const q = currentUser.email ? 'email=' + encodeURIComponent(currentUser.email) : 'mobile=' + encodeURIComponent(currentUser.mobile);
+    const r = await fetch('/api/session?' + q);
+    if(r.status === 404){
+      if(pollInterval){ clearInterval(pollInterval); pollInterval = null; }
+      userLogout();
+      toast('তোমার অ্যাকাউন্টটি এডমিন মুছে ফেলেছে।');
+      return;
+    }
+    if(r.ok){ const d = await r.json(); currentUser = d.user; }
+  }catch(e){ /* network problem hole kichu korbo na — session thakbe */ }
+  loadAllData();
+  checkNotices();
+}
 function userLogout(){
   currentUser = null;
   clearInterval(timerInterval);
+  if(pollInterval){ clearInterval(pollInterval); pollInterval = null; }
   try{ localStorage.removeItem('jobappfrnd_user'); localStorage.removeItem('jobappfrnd_timer'); }catch(e){}
   document.getElementById('user-dashboard').classList.add('hidden');
   document.getElementById('bottom-nav').classList.add('hidden');
+  document.getElementById('notice-modal').classList.add('hidden');
   document.getElementById('auth-section').classList.remove('hidden');
 }
 function switchTab(tab, btn){
