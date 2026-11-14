@@ -233,6 +233,7 @@ select option{background:#0e2a32;color:#f2f4ff}
       <button class="btn primary" onclick="uploadUserPdf()">আপলোড করুন</button>
       <div class="upload-status" id="user-pdf-status"></div>
     </div>
+    <p class="muted tiny" id="pdf-privacy-note" style="text-align:center"></p>
     <div id="pdf-reader-box" class="card reader-box hidden">
       <strong id="reader-title">পিডিএফ রিডার</strong>
       <button class="btn red sm" style="float:right;margin:0" onclick="closeReader()">বন্ধ করো ✖</button>
@@ -648,7 +649,7 @@ function openPdfReader(title, link){
   if(link.includes('/api/pdfs/')){
     // Upload kora file (book/document) — nijer PDF.js viewer diye khola hobe (WebView e chole, Google lage na)
     const rel = link.startsWith('http') ? link.replace(location.origin, '') : link;
-    embedLink = '/pdfjs/viewer.html?file=' + encodeURIComponent(rel);
+    embedLink = '/pdfjs/viewer.html?file=' + encodeURIComponent(rel + (rel.includes('?') ? '&' : '?') + 'viewer=' + encodeURIComponent(currentUser ? currentUser.name : ''));
   } else {
     // Google Drive view link -> preview link
     embedLink = link.replace('/view?usp=sharing','/preview').replace('/view','/preview');
@@ -663,7 +664,7 @@ function openPdfFile(id, title){
   // Google Docs Viewer o WebView e block hoy (ERR_BLOCKED_BY_RESPONSE) —
   // tai nijer PDF.js viewer (public/pdfjs/) diye khola hocche, eta WebView + browser — duijaygatei chole।
   document.getElementById('reader-title').innerText = 'পড়ছো: ' + title;
-  document.getElementById('pdf-frame').src = '/pdfjs/viewer.html?file=' + encodeURIComponent('/api/pdfs/' + id + '/file');
+  document.getElementById('pdf-frame').src = '/pdfjs/viewer.html?file=' + encodeURIComponent('/api/pdfs/' + id + '/file?viewer=' + encodeURIComponent(currentUser ? currentUser.name : ''));
   document.getElementById('pdf-reader-box').classList.remove('hidden');
   document.getElementById('pdf-reader-box').scrollIntoView({behavior:'smooth'});
 }
@@ -715,7 +716,9 @@ async function uploadUserPdf(){
 function esc(s){ return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 async function loadAllData(){
   let d;
-  try{ d = await api('/api/data'); }catch(e){ return; }
+  try{ d = await api('/api/data' + (currentUser ? '?viewer=' + encodeURIComponent(currentUser.name) : '')); }catch(e){ return; }
+  let pn = document.getElementById('pdf-privacy-note');
+  if(pn) pn.innerText = d.pdfsPublic ? '🌐 সবার PDF সবার কাছে খোলা আছে।' : '🔒 তোমার PDF শুধু তুমিই দেখতে পারবে।';
   allUsers = (d.users || []).filter(u => (u.studySeconds || 0) > 0);
   updateTimeDisplay();
   const top = allUsers.slice(0,3);
@@ -751,7 +754,7 @@ async function loadAllData(){
     html += '<div class="card doc-card"><h4>📕 ' + esc(p.title) + '</h4>' +
       '<small>📤 আপলোড করেছেন: ' + esc(p.addedBy) + ' • ' + esc(p.filename||'') + '</small><br><span class="chip pdf">PDF ফাইল</span><br>' +
       '<button class="btn blue sm" onclick="openPdfFile(' + p.id + ', \'' + esc(p.title) + '\')">অ্যাপের ভেতরে পড়ো 📖</button> ' +
-      '<a class="btn ghost sm" style="display:inline-block;text-decoration:none;text-align:center" href="/api/pdfs/' + p.id + '/file" target="_blank">⬇️ ডাউনলোড</a></div>';
+      '<a class="btn ghost sm" style="display:inline-block;text-decoration:none;text-align:center" href="/api/pdfs/' + p.id + '/file?viewer=' + encodeURIComponent(currentUser ? currentUser.name : '') + '" target="_blank">⬇️ ডাউনলোড</a></div>';
   });
   docs.forEach(dd=>{
     const isFile = (dd.link || '').includes('/api/pdfs/');

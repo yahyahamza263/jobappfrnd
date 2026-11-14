@@ -326,6 +326,13 @@
                     <button class="btn-pink" onclick="uploadPdf()">আপলোড করুন</button>
                     <div class="upload-status" id="pdf-upload-status"></div>
                 </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="icon-badge">🌐</div>
+                        <div><h4>সবার PDF সবার কাছে</h4><p class="card-hint" id="pdf-public-state">এখন বন্ধ — প্রত্যেকে শুধু নিজের PDF দেখতে পারে।</p></div>
+                    </div>
+                    <button class="btn-gold" id="pdf-public-btn" onclick="togglePdfsPublic()">🌐 সবার জন্য খুলে দাও</button>
+                </div>
                 <h4 class="list-title">📄 আপলোড করা পিডিএফ</h4>
                 <p class="list-sub">Turso-তে জমা থাকা পিডিএফ ফাইল।</p>
                 <div id="pdf-list"></div>
@@ -623,6 +630,12 @@
     async function loadAdminContent(){
         let d;
         try{ d = await api('/api/data'); }catch(e){ return; }
+        // PDF public toggle er obostha
+        pdfsPublicNow = !!d.pdfsPublic;
+        let ps = document.getElementById('pdf-public-state');
+        let pb = document.getElementById('pdf-public-btn');
+        if(ps) ps.innerText = pdfsPublicNow ? 'এখন চালু — সবাই সবার PDF দেখতে পারে।' : 'এখন বন্ধ — প্রত্যেকে শুধু নিজের PDF দেখতে পারে।';
+        if(pb) pb.innerText = pdfsPublicNow ? '🔒 আবার ব্যক্তিগত করো' : '🌐 সবার জন্য খুলে দাও';
         // Books
         let books = d.books || [];
         let bl = document.getElementById('book-list');
@@ -653,6 +666,17 @@
                 nl.innerHTML += '<div class="item-row"><div class="item-ic">📢</div><div class="item-info"><strong>' + esc(txt) + '</strong></div></div>';
             });
         }
+    }
+
+    // ---- PDF public toggle: admin chaile sobar PDF sobar kache khule debe ----
+    let pdfsPublicNow = false;
+    async function togglePdfsPublic(){
+        try{
+            const d = await api('/api/admin/pdfs-public','POST',{public: !pdfsPublicNow});
+            pdfsPublicNow = !!d.public;
+            loadAdminContent();
+            alert(pdfsPublicNow ? 'সবার PDF এখন সবার কাছে খোলা!' : 'PDF আবার ব্যক্তিগত করা হয়েছে!');
+        }catch(e){ alert(e.message); }
     }
 
     async function deleteNotice(id){
