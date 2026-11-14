@@ -4,63 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>JobAppFrnd — সরকারি চাকরি প্রস্তুতি</title>
-<meta name="theme-color" content="#0b0e1a">
+<meta name="theme-color" content="#0a1e24">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hind Siliguri","Noto Sans Bengali",sans-serif;background:#0b0e1a;color:#f2f4ff;min-height:100vh;padding-bottom:96px;overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hind Siliguri","Noto Sans Bengali",sans-serif;background:#0a1e24;color:#f2f4ff;min-height:100vh;padding-bottom:96px;overflow-x:hidden}
 .hidden{display:none!important}
 .bg-orbs{position:fixed;inset:0;z-index:-1;overflow:hidden}
 .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35}
-.o1{width:340px;height:340px;background:#5b4bff;top:-90px;left:-90px;animation:drift 14s ease-in-out infinite alternate}
-.o2{width:280px;height:280px;background:#0fbf8f;bottom:6%;right:-80px;animation:drift 18s ease-in-out infinite alternate-reverse}
-.o3{width:220px;height:220px;background:#ff5e8a;top:38%;left:60%;opacity:.16;animation:drift 16s ease-in-out infinite alternate}
-.o4{width:180px;height:180px;background:#ffb020;top:70%;left:-40px;opacity:.14;animation:drift 20s ease-in-out infinite alternate-reverse}
+.o1{width:340px;height:340px;background:#0d9488;top:-90px;left:-90px;animation:drift 14s ease-in-out infinite alternate}
+.o2{width:280px;height:280px;background:#34d399;bottom:6%;right:-80px;animation:drift 18s ease-in-out infinite alternate-reverse}
+.o3{width:220px;height:220px;background:#fb7185;top:38%;left:60%;opacity:.16;animation:drift 16s ease-in-out infinite alternate}
+.o4{width:180px;height:180px;background:#fbbf24;top:70%;left:-40px;opacity:.14;animation:drift 20s ease-in-out infinite alternate-reverse}
 @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(46px,36px) scale(1.15)}}
 .screen{max-width:560px;margin:0 auto;padding:0 16px}
 .card{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:18px;margin:14px 0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.35);animation:rise .45s ease both}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 .btn{border:none;border-radius:14px;padding:13px 18px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:transform .08s ease,filter .15s ease;margin-top:10px;font-family:inherit}
 .btn:active{transform:scale(.97)}
-.btn.primary{background:linear-gradient(135deg,#c8f542,#a4d92e);color:#131602;box-shadow:0 6px 22px rgba(200,245,66,.35)}
-.btn.blue{background:linear-gradient(135deg,#4f8cff,#7b5cff);color:#fff;box-shadow:0 6px 22px rgba(99,102,241,.45)}
-.btn.green{background:linear-gradient(135deg,#22c55e,#0fbf8f);color:#fff;box-shadow:0 6px 22px rgba(34,197,94,.4)}
-.btn.red{background:linear-gradient(135deg,#ff5e6c,#e5484d);color:#fff;box-shadow:0 6px 22px rgba(229,72,77,.4)}
-.btn.violet{background:linear-gradient(135deg,#a78bfa,#6d28d9);color:#fff;box-shadow:0 6px 22px rgba(139,92,246,.45)}
+.btn.primary{background:linear-gradient(135deg,#2dd4bf,#34d399);color:#042f2e;box-shadow:0 6px 22px rgba(45,212,191,.35)}
+.btn.blue{background:linear-gradient(135deg,#2dd4bf,#0d9488);color:#fff;box-shadow:0 6px 22px rgba(45,212,191,.45)}
+.btn.green{background:linear-gradient(135deg,#34d399,#34d399);color:#fff;box-shadow:0 6px 22px rgba(52,211,153,.4)}
+.btn.red{background:linear-gradient(135deg,#fb7185,#e11d48);color:#fff;box-shadow:0 6px 22px rgba(251,113,133,.4)}
+.btn.violet{background:linear-gradient(135deg,#2dd4bf,#0d9488);color:#fff;box-shadow:0 6px 22px rgba(45,212,191,.45)}
 .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.16);color:#f2f4ff}
 .btn.sm{width:auto;padding:9px 16px;font-size:13px;margin-top:6px}
 input,select,textarea{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:13px 14px;color:#f2f4ff;font-size:16px;margin-top:10px;font-family:inherit}
-input:focus,select:focus,textarea:focus{outline:2px solid #8b7bff;border-color:transparent}
-select option{background:#141a36;color:#f2f4ff}
+input:focus,select:focus,textarea:focus{outline:2px solid #2dd4bf;border-color:transparent}
+select option{background:#0e2a32;color:#f2f4ff}
 .field-label{display:block;font-size:12px;font-weight:700;color:#9aa0c3;margin:12px 0 -4px;letter-spacing:.5px}
 .muted{color:#9aa0c3}
 .tiny{font-size:12px}
 .center{text-align:center}
 .auth-wrap{padding:52px 4px 40px;text-align:center}
-.logo-big{font-size:64px;animation:floaty 2.6s ease-in-out infinite;filter:drop-shadow(0 0 26px rgba(200,245,66,.55))}
+.logo-big{font-size:64px;animation:floaty 2.6s ease-in-out infinite;filter:drop-shadow(0 0 26px rgba(45,212,191,.55))}
 @keyframes floaty{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.08)}}
-.brand{font-size:38px;margin:8px 0 2px;letter-spacing:-1px;background:linear-gradient(90deg,#c8f542,#4f8cff,#ff5e8a,#ffb020,#c8f542);background-size:300% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+.brand{font-size:38px;margin:8px 0 2px;letter-spacing:-1px;background:linear-gradient(90deg,#2dd4bf,#5eead4,#fbbf24,#34d399,#2dd4bf);background-size:300% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
 @keyframes shine{to{background-position:300% center}}
 .tagline{color:#9aa0c3;margin:0 0 22px}
 .seg{display:inline-flex;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:4px;margin-bottom:6px}
 .seg-btn{border:none;background:transparent;color:#9aa0c3;font-weight:700;padding:9px 22px;border-radius:999px;cursor:pointer;font-size:14px;font-family:inherit}
-.seg-btn.active{background:#c8f542;color:#131602;box-shadow:0 4px 16px rgba(200,245,66,.4)}
+.seg-btn.active{background:#2dd4bf;color:#042f2e;box-shadow:0 4px 16px rgba(45,212,191,.4)}
 .auth-card{text-align:left}
 .auth-card h2{margin:0 0 6px}
 .otp-row{display:flex;gap:8px;align-items:center}
 .otp-row input{flex:1;min-width:0}
 .otp-btn{width:auto !important;flex:none;margin-top:0 !important;padding:12px 13px !important;font-size:13px !important;white-space:nowrap}
-.link{color:#7dd3fc;cursor:pointer;text-decoration:underline}
+.link{color:#5eead4;cursor:pointer;text-decoration:underline}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 4px 6px}
 .me{display:flex;gap:10px;align-items:center}
-.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#5b4bff,#ff5e8a);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:2px solid rgba(255,255,255,.16);color:#fff}
+.avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#fb7185);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;border:2px solid rgba(255,255,255,.16);color:#fff}
 .me-name{font-weight:800;font-size:16px}
 .me-sub{font-size:12px;color:#9aa0c3}
-.rank-pill{background:linear-gradient(135deg,#2a3358,#1a2040);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 14px;font-weight:800;color:#c8f542}
-.hero{border-radius:22px;padding:20px;margin:14px 0;background:linear-gradient(135deg,rgba(91,75,255,.35),rgba(255,94,138,.22),rgba(15,191,143,.18));border:1px solid rgba(139,123,255,.4);animation:rise .45s ease both}
+.rank-pill{background:linear-gradient(135deg,#134e4a,#0a1e24);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 14px;font-weight:800;color:#fbbf24}
+.hero{border-radius:22px;padding:20px;margin:14px 0;background:linear-gradient(135deg,rgba(45,212,191,.35),rgba(251,113,133,.22),rgba(52,211,153,.18));border:1px solid rgba(45,212,191,.4);animation:rise .45s ease both}
 .hero h2{margin:0;font-size:21px}
 .hero p{margin:6px 0 0;color:#dbe1ff;font-size:14px;line-height:1.6}
-.notice{border-radius:14px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.6;background:linear-gradient(135deg,rgba(139,123,255,.2),rgba(200,245,66,.1));border:1px solid rgba(139,123,255,.4);animation:rise .4s ease both}
+.notice{border-radius:14px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.6;background:linear-gradient(135deg,rgba(45,212,191,.2),rgba(45,212,191,.1));border:1px solid rgba(45,212,191,.4);animation:rise .4s ease both}
 .notice.empty{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.09);color:#9aa0c3}
 .sect{margin:20px 4px 8px;font-size:17px;font-weight:800}
 .sect small{display:block;font-size:12px;color:#9aa0c3;font-weight:600;margin-top:2px}
@@ -68,64 +68,65 @@ select option{background:#141a36;color:#f2f4ff}
 .timer-ring{position:relative;width:220px;height:220px;margin:6px auto}
 .timer-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:12}
-.ring-fg{fill:none;stroke:#c8f542;stroke-width:12;stroke-linecap:round;stroke-dasharray:553;stroke-dashoffset:553;transition:stroke-dashoffset 1s linear;filter:drop-shadow(0 0 8px rgba(200,245,66,.7))}
+.ring-fg{fill:none;stroke:#2dd4bf;stroke-width:12;stroke-linecap:round;stroke-dasharray:553;stroke-dashoffset:553;transition:stroke-dashoffset 1s linear;filter:drop-shadow(0 0 8px rgba(45,212,191,.7))}
 .timer-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #timer-text{font-size:34px;font-weight:800;letter-spacing:1px;font-variant-numeric:tabular-nums}
 .timer-btns{display:flex;gap:10px;margin-top:8px}
 .timer-btns .btn{margin-top:0}
 .goal-note{font-size:13px;color:#9aa0c3;margin-top:10px}
 .stats3{display:flex;justify-content:space-around;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09)}
-.stats3 b{display:block;font-size:20px;color:#c8f542}
+.stats3 b{display:block;font-size:20px;color:#2dd4bf}
 .stats3 span{font-size:12px;color:#9aa0c3}
 .podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:20px 0 6px;min-height:190px}
 .podium-card{text-align:center;width:30%;position:relative;animation:rise .5s ease both}
 .podium-card.first{width:36%}
 .podium .medal{font-size:30px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.5))}
 .podium-card.first .medal{font-size:40px}
-.podium .p-avatar{width:64px;height:64px;margin:6px auto;font-size:28px;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a3358,#141a36);color:#fff}
+.podium .p-avatar{width:64px;height:64px;margin:6px auto;font-size:28px;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#134e4a,#0e2a32);color:#fff}
 .podium-card.first .p-avatar{width:84px;height:84px;font-size:36px}
-.ring-gold{border:3px solid #ffd34d;box-shadow:0 0 24px rgba(255,211,77,.55)}
+.ring-gold{border:3px solid #fbbf24;box-shadow:0 0 24px rgba(251,191,36,.55)}
 .ring-silver{border:3px solid #cfd6ea;box-shadow:0 0 18px rgba(207,214,234,.4)}
 .ring-bronze{border:3px solid #f0a35e;box-shadow:0 0 18px rgba(240,163,94,.4)}
 .podium .p-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .podium-card.first .p-name{font-size:17px}
-.podium .p-time{font-weight:800;color:#c8f542;font-size:15px;margin-top:2px}
+.podium .p-time{font-weight:800;color:#2dd4bf;font-size:15px;margin-top:2px}
 .podium .crown{position:absolute;top:-26px;left:50%;transform:translateX(-50%) rotate(-12deg);font-size:30px;animation:bob 2s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateX(-50%) rotate(-12deg) translateY(0)}50%{transform:translateX(-50%) rotate(-12deg) translateY(-6px)}}
 .board-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:12px 14px;animation:rise .4s ease both}
-.row.me-row{border-color:rgba(200,245,66,.6);background:rgba(200,245,66,.08)}
+.row.me-row{border-color:rgba(45,212,191,.6);background:rgba(45,212,191,.08)}
 .row .rank{font-weight:800;width:30px;text-align:center;color:#9aa0c3;font-size:15px}
 .row .avatar{width:44px;height:44px;font-size:20px}
 .row .who{flex:1;min-width:0}
 .row .who .n{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .who .c{font-size:12px;color:#9aa0c3}
 .row .t{text-align:right}
-.row .t .f{font-weight:800;color:#c8f542;font-size:16px}
+.row .t .f{font-weight:800;color:#2dd4bf;font-size:16px}
 .row .t .s{font-size:11px;color:#9aa0c3}
-.doc-card{border-left:4px solid #22d3ee}
-.book-card{border-left:4px solid #a78bfa}
+.doc-card{border-left:4px solid #2dd4bf}
+.book-card{border-left:4px solid #fbbf24}
 .doc-card h4,.book-card h4{margin:0 0 4px;font-size:16px}
 .doc-card small,.book-card small{color:#9aa0c3}
 .file-row{display:flex;gap:8px;align-items:center}
 .upload-prog{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:10px}
-.upload-prog i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#22d3ee,#a78bfa);border-radius:99px;transition:width .3s}
-.reader-box{border-left:4px solid #ff5e6c}
+.upload-prog i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#2dd4bf,#2dd4bf);border-radius:99px;transition:width .3s}
+.reader-box{border-left:4px solid #fb7185}
 .reader-box iframe{width:100%;height:520px;border:1px solid rgba(255,255,255,.14);border-radius:12px;margin-top:10px;background:#fff}
 .chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;margin-top:6px}
-.chip.pdf{background:rgba(34,211,238,.16);color:#67e8f9}
-.chip.link{background:rgba(167,139,250,.16);color:#c4b5fd}
-.chip.book{background:rgba(255,176,32,.16);color:#fcd34d}
+.chip.pdf{background:rgba(45,212,191,.16);color:#5eead4}
+.chip.link{background:rgba(251,191,36,.16);color:#fcd34d}
+.chip.book{background:rgba(251,191,36,.16);color:#fcd34d}
 .profile-hero{text-align:center;margin-top:16px}
-.p-avatar-big{font-size:44px;font-weight:800;width:96px;height:96px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,#5b4bff,#ff5e8a);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.16);color:#fff}
-.kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:15px}
+.p-avatar-big{font-size:44px;font-weight:800;width:96px;height:96px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,#0d9488,#fb7185);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.16);color:#fff}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:15px}
 .kv:last-child{border-bottom:none}
-.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;background:rgba(11,14,26,.88);backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.1);padding:8px 6px calc(10px + env(safe-area-inset-bottom))}
+.kv b{text-align:right;word-break:break-all}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;background:rgba(10,30,36,.88);backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.1);padding:8px 6px calc(10px + env(safe-area-inset-bottom))}
 .nav-btn{flex:1;min-width:0;background:none;border:none;color:#9aa0c3;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:20px;padding:6px 0;font-family:inherit}
 .nav-btn label{font-size:11px;font-weight:700}
-.nav-btn.active{color:#c8f542}
-.nav-play{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#c8f542,#a4d92e);color:#131602;display:flex;align-items:center;justify-content:center;font-size:20px;margin-top:-26px;box-shadow:0 8px 24px rgba(200,245,66,.45);border:4px solid #0b0e1a}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1c233f;border:1px solid rgba(255,255,255,.14);padding:12px 20px;border-radius:14px;z-index:200;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center;animation:rise .25s ease}
+.nav-btn.active{color:#2dd4bf}
+.nav-play{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#2dd4bf,#34d399);color:#042f2e;display:flex;align-items:center;justify-content:center;font-size:20px;margin-top:-26px;box-shadow:0 8px 24px rgba(45,212,191,.45);border:4px solid #0a1e24}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#0f2b33;border:1px solid rgba(255,255,255,.14);padding:12px 20px;border-radius:14px;z-index:200;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center;animation:rise .25s ease}
 @media (min-width:600px){.bottomnav{max-width:560px;margin:0 auto;border-radius:24px 24px 0 0}}
 </style>
 </head>
@@ -210,8 +211,8 @@ select option{background:#141a36;color:#f2f4ff}
   </div>
 
   <div class="user-sub-tab hidden" id="ustub-docs">
-    <h3 class="sect">📄 পিডিএফ পড়ার ঘর<small>ফাইল আপলোড করো বা লিংক যোগ করো — অ্যাপের ভেতরেই পড়ো</small></h3>
-    <div class="card" style="border-left:4px solid #22d3ee">
+    <h3 class="sect">📄 পিডিএফ পড়ার ঘর<small>ফাইল আপলোড করো — অ্যাপের ভেতরেই পড়ো</small></h3>
+    <div class="card" style="border-left:4px solid #2dd4bf">
       <h4 style="margin:0">📤 পিডিএফ ফাইল আপলোড করো</h4>
       <p class="muted tiny" style="margin:6px 0 0">ফোন থেকে সরাসরি PDF বেছে নাও — সবার কাছে পৌঁছে যাবে। সর্বোচ্চ ১০ MB।</p>
       <input type="text" id="pdf-title" placeholder="পিডিএফের নাম (যেমন: বাংলা ব্যাকরণ নোট)">
@@ -219,13 +220,6 @@ select option{background:#141a36;color:#f2f4ff}
       <div class="upload-prog hidden" id="upload-prog"><i id="upload-fill"></i></div>
       <p class="tiny muted hidden" id="upload-status"></p>
       <button class="btn blue" onclick="uploadPdf()">⬆️ আপলোড করো</button>
-    </div>
-    <div class="card" style="border-left:4px solid #22c55e">
-      <h4 style="margin:0">🔗 লিংক দিয়ে ডকুমেন্ট যোগ করো</h4>
-      <p class="muted tiny" style="margin:6px 0 0">Google Drive বা যেকোনো PDF লিংক দিলেই হবে।</p>
-      <input type="text" id="doc-title" placeholder="ডকুমেন্টের নাম (যেমন: আবেদন কপি)">
-      <input type="text" id="doc-link" placeholder="Google Drive বা PDF লিংক দাও">
-      <button class="btn green" onclick="addUserDoc()">💾 ডকুমেন্ট সেভ করো</button>
     </div>
     <div id="pdf-reader-box" class="card reader-box hidden">
       <strong id="reader-title">পিডিএফ রিডার</strong>
@@ -436,17 +430,6 @@ function updateTimeDisplay(){
   document.getElementById('p-rank').innerText = r ? '#' + bn(r) : '—';
   document.getElementById('me-rank-pill').innerText = r ? '🏆 #' + bn(r) : '🏆 নতুন';
 }
-async function addUserDoc(){
-  let title = document.getElementById('doc-title').value.trim();
-  let link = document.getElementById('doc-link').value.trim();
-  if(!title || !link){ toast('নাম ও লিংক দাও!'); return; }
-  try{
-    await api('/api/docs','POST',{title, link, addedBy: currentUser.name});
-    document.getElementById('doc-title').value = '';
-    document.getElementById('doc-link').value = '';
-    loadAllData(); toast('ডকুমেন্ট যুক্ত হয়েছে! ✅');
-  }catch(e){ toast(e.message); }
-}
 async function uploadPdf(){
   const title = document.getElementById('pdf-title').value.trim();
   const fileInput = document.getElementById('pdf-file');
@@ -544,8 +527,10 @@ async function loadAllData(){
       '<a class="btn ghost sm" style="display:inline-block;text-decoration:none;text-align:center" href="/api/pdfs/' + p.id + '/file" target="_blank">⬇️ ডাউনলোড</a></div>';
   });
   docs.forEach(dd=>{
+    const isFile = (dd.link || '').includes('/api/pdfs/');
+    const chip = isFile ? '<span class="chip pdf">PDF ফাইল</span>' : '<span class="chip link">লিংক</span>';
     html += '<div class="card doc-card"><h4>📄 ' + esc(dd.title) + '</h4>' +
-      '<small>যোগ করেছেন: ' + esc(dd.addedBy) + '</small><br><span class="chip link">লিংক</span><br>' +
+      '<small>যোগ করেছেন: ' + esc(dd.addedBy) + '</small><br>' + chip + '<br>' +
       '<button class="btn blue sm" onclick="openPdfReader(\'' + esc(dd.title) + '\', \'' + esc(dd.link) + '\')">অ্যাপের ভেতরে পড়ো 📖</button></div>';
   });
   docsDiv.innerHTML = html || '<p class="muted center">কোনো ডকুমেন্ট যোগ করা হয়নি।</p>';
@@ -553,7 +538,7 @@ async function loadAllData(){
   const booksDiv = document.getElementById('books-list');
   booksDiv.innerHTML = books.length ? '' : '<p class="muted center">অ্যাডমিন এখনো কোনো বই যোগ করেননি।</p>';
   books.forEach((b, i)=>{
-    const colors = ['#a78bfa','#22d3ee','#ffb020','#ff5e8a','#22c55e'];
+    const colors = ['#2dd4bf','#5eead4','#fbbf24','#fb7185','#34d399'];
     const c = colors[i % colors.length];
     booksDiv.innerHTML += '<div class="card book-card" style="border-left-color:' + c + '"><h4>📚 ' + esc(b.title) + '</h4>' +
       '<small>লেখক/প্রকাশনী: ' + esc(b.author) + '</small><br><span class="chip book">বই</span><br>' +
