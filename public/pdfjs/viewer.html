@@ -2,25 +2,26 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>PDF পড়ুন — JobAppFrnd</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; height: 100%; }
-  body { background: #0b0e1a; color: #f2f4ff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", "Noto Sans Bengali", sans-serif; display: flex; flex-direction: column; overflow: hidden; }
-  .toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #141a33; border-bottom: 1px solid rgba(255,255,255,.1); flex: none; flex-wrap: wrap; }
+  body { background: #0a1e24; color: #f2f4ff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hind Siliguri", "Noto Sans Bengali", sans-serif; display: flex; flex-direction: column; overflow: hidden; }
+  .toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #0f2e33; border-bottom: 1px solid rgba(255,255,255,.1); flex: none; flex-wrap: wrap; }
   .toolbar button { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #f2f4ff; border-radius: 9px; padding: 7px 11px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .toolbar button:active { transform: scale(.96); }
   .toolbar button:disabled { opacity: .4; }
   .toolbar .pg { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 700; }
   .toolbar input { width: 52px; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.16); border-radius: 8px; color: #f2f4ff; padding: 7px 6px; font-size: 14px; text-align: center; font-family: inherit; }
   .toolbar .spacer { flex: 1; }
-  .toolbar a { color: #7dd3fc; font-size: 13px; font-weight: 700; text-decoration: none; }
-  .stage { flex: 1; overflow: auto; display: flex; justify-content: center; padding: 14px 10px 24px; -webkit-overflow-scrolling: touch; }
-  canvas { background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.6); max-width: 100%; height: auto !important; }
+  .toolbar .zoom-label { font-size: 13px; font-weight: 700; color: #5eead4; min-width: 44px; text-align: center; }
+  .toolbar a { color: #5eead4; font-size: 13px; font-weight: 700; text-decoration: none; }
+  .stage { flex: 1; overflow: auto; display: flex; padding: 14px 10px 24px; -webkit-overflow-scrolling: touch; touch-action: none; }
+  canvas { display: block; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.6); flex: none; margin: auto; }
   .msg { text-align: center; color: #9aa0c3; padding: 40px 20px; font-size: 15px; line-height: 1.7; }
   .msg b { color: #f2f4ff; }
-  .msg a { color: #7dd3fc; }
+  .msg a { color: #5eead4; }
   .hidden { display: none !important; }
 </style>
 </head>
@@ -31,6 +32,7 @@
   <button id="next" disabled>এগিয়ে ›</button>
   <div class="spacer"></div>
   <button id="zoom-out">−</button>
+  <span class="zoom-label" id="zoom-label">100%</span>
   <button id="zoom-in">+</button>
   <button id="fit">↔ ফিট</button>
   <a id="dl" href="#" target="_blank" rel="noopener">⬇️ ডাউনলোড</a>
@@ -46,6 +48,7 @@
   var file = params.get('file');
   var msg = document.getElementById('msg');
   var cv = document.getElementById('cv');
+  var stage = document.getElementById('stage');
   var ctx = cv.getContext('2d');
   var pdf = null, pageNum = 1, scale = 1, fitScale = 1, rendering = false, pending = null;
 
@@ -60,8 +63,13 @@
     msg.innerHTML = '<b>❌ PDF খোলা যায়নি।</b><br>' + text + '<br><br><a href="' + file + '" target="_blank" rel="noopener">⬇️ PDF ডাউনলোড করে দেখুন</a>';
   }
 
+  function updateZoomLabel() {
+    document.getElementById('zoom-label').innerText = Math.round(scale * 100) + '%';
+  }
+
   function renderPage(num) {
     rendering = true;
+    cv.style.transform = '';
     pdf.getPage(num).then(function (page) {
       var viewport = page.getViewport({ scale: scale });
       var dpr = window.devicePixelRatio || 1;
@@ -73,6 +81,7 @@
       return page.render(renderCtx).promise;
     }).then(function () {
       rendering = false;
+      updateZoomLabel();
       document.getElementById('pgnum').value = num;
       document.getElementById('prev').disabled = (num <= 1);
       document.getElementById('next').disabled = (num >= pdf.numPages);
@@ -92,19 +101,92 @@
     if (!pdf) return;
     pdf.getPage(pageNum).then(function (page) {
       var vp = page.getViewport({ scale: 1 });
-      var stageW = document.getElementById('stage').clientWidth - 20;
+      var stageW = stage.clientWidth - 20;
       fitScale = stageW / vp.width;
       scale = fitScale;
       renderPage(pageNum);
     });
   }
 
+  function zoomBy(f) {
+    if (!pdf) return;
+    scale = Math.max(0.4, Math.min(4, scale * f));
+    renderPage(pageNum);
+  }
+
   document.getElementById('prev').onclick = function () { goTo(pageNum - 1); };
   document.getElementById('next').onclick = function () { goTo(pageNum + 1); };
   document.getElementById('pgnum').onchange = function () { goTo(parseInt(this.value, 10) || 1); };
-  document.getElementById('zoom-in').onclick = function () { scale = Math.min(scale * 1.25, 4); renderPage(pageNum); };
-  document.getElementById('zoom-out').onclick = function () { scale = Math.max(scale / 1.25, 0.4); renderPage(pageNum); };
+  document.getElementById('zoom-in').onclick = function () { zoomBy(1.25); };
+  document.getElementById('zoom-out').onclick = function () { zoomBy(1 / 1.25); };
   document.getElementById('fit').onclick = fitWidth;
+
+  // --- Touch: 1 angul e move (pan), 2 angul e pinch zoom ---
+  var touches = new Map();
+  var pinchStartDist = 0, pinchStartScale = 1, pinchLive = 1;
+  var lastPan = null;
+
+  function touchPoints() { return Array.from(touches.values()); }
+
+  stage.addEventListener('touchstart', function (e) {
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      var t = e.changedTouches[i];
+      touches.set(t.identifier, { x: t.clientX, y: t.clientY });
+    }
+    if (touches.size === 2) {
+      var pts = touchPoints();
+      pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      pinchStartScale = scale;
+      pinchLive = 1;
+      lastPan = null;
+    } else if (touches.size === 1) {
+      var p = touchPoints()[0];
+      lastPan = { x: p.x, y: p.y };
+    }
+  }, { passive: true });
+
+  stage.addEventListener('touchmove', function (e) {
+    if (touches.size === 0) return;
+    e.preventDefault();
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      var t = e.changedTouches[i];
+      touches.set(t.identifier, { x: t.clientX, y: t.clientY });
+    }
+    if (touches.size === 2 && pinchStartDist > 0) {
+      var pts = touchPoints();
+      var d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      pinchLive = d / pinchStartDist;
+      var ns = Math.max(0.4, Math.min(4, pinchStartScale * pinchLive));
+      cv.style.transform = 'scale(' + (ns / scale) + ')';
+      cv.style.transformOrigin = 'center center';
+    } else if (touches.size === 1 && lastPan) {
+      var p = touchPoints()[0];
+      stage.scrollLeft -= (p.x - lastPan.x);
+      stage.scrollTop -= (p.y - lastPan.y);
+      lastPan = { x: p.x, y: p.y };
+    }
+  }, { passive: false });
+
+  function touchEnd(e) {
+    for (var i = 0; i < e.changedTouches.length; i++) touches.delete(e.changedTouches[i].identifier);
+    if (touches.size < 2 && pinchStartDist > 0) {
+      var ns = Math.max(0.4, Math.min(4, pinchStartScale * pinchLive));
+      pinchStartDist = 0;
+      pinchLive = 1;
+      cv.style.transform = '';
+      if (pdf && Math.abs(ns - scale) > 0.02) { scale = ns; renderPage(pageNum); }
+    }
+    if (touches.size === 0) lastPan = null;
+  }
+  stage.addEventListener('touchend', touchEnd);
+  stage.addEventListener('touchcancel', touchEnd);
+
+  // Desktop: Ctrl + mouse wheel e zoom
+  stage.addEventListener('wheel', function (e) {
+    if (!pdf || !e.ctrlKey) return;
+    e.preventDefault();
+    zoomBy(e.deltaY < 0 ? 1.1 : 1 / 1.1);
+  }, { passive: false });
 
   pdfjsLib.getDocument({
     url: file,
