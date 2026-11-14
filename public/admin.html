@@ -6,20 +6,20 @@
     <title>JobAppFrnd অ্যাডমিন — সরকারি চাকরি প্রস্তুতি</title>
     <style>
         :root {
-            --bg: #0b0e1a;
-            --bg2: #11162a;
+            --bg: #0a1e24;
+            --bg2: #0e2a32;
             --card: rgba(255,255,255,.055);
             --card-border: rgba(255,255,255,.09);
-            --lime: #c8f542;
-            --lime-dim: #9dc72e;
-            --violet: #8b7bff;
-            --gold: #ffd34d;
-            --cyan: #22d3ee;
-            --pink: #ff5e8a;
-            --red: #ff4d6d;
+            --lime: #2dd4bf;
+            --lime-dim: #059669;
+            --violet: #2dd4bf;
+            --gold: #fbbf24;
+            --cyan: #2dd4bf;
+            --pink: #fb7185;
+            --red: #fb7185;
             --text: #f2f4ff;
             --muted: #9aa0c3;
-            --danger: #ff6b6b;
+            --danger: #fb7185;
             --radius: 20px;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -34,10 +34,10 @@
         /* ---- floating color orbs (transform-only, cheap on low-end phones) ---- */
         .bg-orbs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
         .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .38; animation: drift 14s ease-in-out infinite alternate; }
-        .o1 { width: 340px; height: 340px; background: #ff2d55; top: -100px; left: -90px; }
-        .o2 { width: 300px; height: 300px; background: #5b4bff; top: 34%; right: -110px; animation-delay: -5s; }
-        .o3 { width: 240px; height: 240px; background: #0fbf8f; bottom: 4%; left: -70px; animation-delay: -9s; opacity: .28; }
-        .o4 { width: 200px; height: 200px; background: #ffb020; top: 62%; left: 62%; opacity: .16; animation-delay: -3s; }
+        .o1 { width: 340px; height: 340px; background: #e11d48; top: -100px; left: -90px; }
+        .o2 { width: 300px; height: 300px; background: #0d9488; top: 34%; right: -110px; animation-delay: -5s; }
+        .o3 { width: 240px; height: 240px; background: #34d399; bottom: 4%; left: -70px; animation-delay: -9s; opacity: .28; }
+        .o4 { width: 200px; height: 200px; background: #fbbf24; top: 62%; left: 62%; opacity: .16; animation-delay: -3s; }
         @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(46px,36px) scale(1.14); } }
 
         .hidden { display: none !important; }
@@ -49,8 +49,8 @@
             padding: 26px 20px 22px;
             text-align: center;
             border-radius: 26px;
-            background: linear-gradient(135deg, #ff2d55 0%, #c026d3 52%, #5b4bff 100%);
-            box-shadow: 0 14px 40px rgba(255,45,85,.35), 0 0 0 1px rgba(255,255,255,.12) inset;
+            background: linear-gradient(135deg, #0d9488 0%, #2dd4bf 52%, #34d399 100%);
+            box-shadow: 0 14px 40px rgba(251,113,133,.35), 0 0 0 1px rgba(255,255,255,.12) inset;
             position: relative;
             overflow: hidden;
             animation: rise .5s ease both;
@@ -108,17 +108,15 @@
         .card .card-hint { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
 
         .accent-violet { border-left: 4px solid var(--violet); }
-        .accent-violet .icon-badge { background: linear-gradient(135deg, #8b7bff, #5b4bff); }
+        .accent-violet .icon-badge { background: linear-gradient(135deg, #2dd4bf, #0d9488); }
         .accent-gold { border-left: 4px solid var(--gold); }
-        .accent-gold .icon-badge { background: linear-gradient(135deg, #ffd34d, #ff9f1c); }
+        .accent-gold .icon-badge { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
         .accent-pink { border-left: 4px solid var(--pink); }
-        .accent-pink .icon-badge { background: linear-gradient(135deg, #ff5e8a, #ff2d55); }
+        .accent-pink .icon-badge { background: linear-gradient(135deg, #fb7185, #e11d48); }
         .accent-cyan { border-left: 4px solid var(--cyan); }
-        .accent-cyan .icon-badge { background: linear-gradient(135deg, #22d3ee, #0ea5e9); }
-        .accent-lime { border-left: 4px solid var(--lime); }
-        .accent-lime .icon-badge { background: linear-gradient(135deg, #c8f542, #65a30d); }
+        .accent-cyan .icon-badge { background: linear-gradient(135deg, #2dd4bf, #0d9488); }
         .accent-red { border-left: 4px solid var(--red); }
-        .accent-red .icon-badge { background: linear-gradient(135deg, #ff4d6d, #dc2626); }
+        .accent-red .icon-badge { background: linear-gradient(135deg, #fb7185, #e11d48); }
 
         /* ---- inputs & buttons ---- */
         input, textarea {
@@ -137,18 +135,17 @@
         }
         button:active { transform: scale(.97); }
         button:hover { filter: brightness(1.1); }
-        .btn-violet { background: linear-gradient(135deg, #8b7bff, #5b4bff); box-shadow: 0 6px 22px rgba(139,123,255,.4); }
-        .btn-gold { background: linear-gradient(135deg, #ffd34d, #ff9f1c); color: #3a2c00; box-shadow: 0 6px 22px rgba(255,211,77,.35); }
-        .btn-pink { background: linear-gradient(135deg, #ff5e8a, #ff2d55); box-shadow: 0 6px 22px rgba(255,45,85,.4); }
-        .btn-cyan { background: linear-gradient(135deg, #22d3ee, #0ea5e9); color: #03252e; box-shadow: 0 6px 22px rgba(34,211,238,.35); }
-        .btn-lime { background: linear-gradient(135deg, #c8f542, #9dc72e); color: #131602; box-shadow: 0 6px 22px rgba(200,245,66,.35); }
-        .btn-red { background: linear-gradient(135deg, #ff4d6d, #dc2626); box-shadow: 0 6px 22px rgba(255,77,109,.35); }
+        .btn-violet { background: linear-gradient(135deg, #2dd4bf, #0d9488); box-shadow: 0 6px 22px rgba(45,212,191,.4); }
+        .btn-gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #3a2c00; box-shadow: 0 6px 22px rgba(251,191,36,.35); }
+        .btn-pink { background: linear-gradient(135deg, #fb7185, #e11d48); box-shadow: 0 6px 22px rgba(251,113,133,.4); }
+        .btn-cyan { background: linear-gradient(135deg, #2dd4bf, #0d9488); color: #03252e; box-shadow: 0 6px 22px rgba(45,212,191,.35); }
+        .btn-red { background: linear-gradient(135deg, #fb7185, #e11d48); box-shadow: 0 6px 22px rgba(251,113,133,.35); }
         .btn-ghost { background: transparent; border: 1px solid var(--card-border); color: var(--text); }
         .btn-small { width: auto; padding: 7px 14px; font-size: 13px; margin-top: 8px; border-radius: 10px; }
 
         /* ---- login ---- */
         .login-wrap { padding: 34px 4px 10px; text-align: center; animation: rise .5s ease both; }
-        .login-logo { font-size: 62px; filter: drop-shadow(0 0 26px rgba(255,45,85,.6)); animation: bob 2.4s ease-in-out infinite; }
+        .login-logo { font-size: 62px; filter: drop-shadow(0 0 26px rgba(251,113,133,.6)); animation: bob 2.4s ease-in-out infinite; }
         @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
         .login-card { text-align: left; margin-top: 18px; }
         .login-card h3 { margin: 0 0 4px; font-size: 19px; }
@@ -157,16 +154,16 @@
         /* ---- PDF upload ---- */
         .file-picker {
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            border: 2px dashed rgba(255,94,138,.55); border-radius: 14px;
-            background: rgba(255,94,138,.07); padding: 18px 12px; margin-top: 12px;
+            border: 2px dashed rgba(251,113,133,.55); border-radius: 14px;
+            background: rgba(251,113,133,.07); padding: 18px 12px; margin-top: 12px;
             cursor: pointer; font-weight: 700; font-size: 15px; text-align: center;
             transition: background .15s ease, transform .1s ease;
         }
         .file-picker:active { transform: scale(.98); }
-        .file-picker:hover { background: rgba(255,94,138,.13); }
+        .file-picker:hover { background: rgba(251,113,133,.13); }
         .file-name { margin-top: 8px; font-size: 13px; color: var(--gold); word-break: break-all; }
         .upload-status { margin-top: 10px; font-size: 14px; font-weight: 700; min-height: 20px; }
-        .upload-status.ok { color: #37e08b; }
+        .upload-status.ok { color: #34d399; }
         .upload-status.err { color: var(--danger); }
         .upload-status.busy { color: var(--gold); }
         .max-note { font-size: 12px; color: var(--muted); margin: 8px 0 0; text-align: center; }
@@ -181,18 +178,18 @@
         }
         .user-avatar {
             width: 44px; height: 44px; flex: none; border-radius: 50%;
-            background: linear-gradient(135deg, #ff4d6d, #8b7bff);
+            background: linear-gradient(135deg, #fb7185, #2dd4bf);
             display: flex; align-items: center; justify-content: center;
             font-size: 20px; font-weight: 800;
         }
         .user-info { flex: 1; min-width: 0; }
         .user-info strong { font-size: 15px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .user-info small { color: var(--muted); font-size: 12.5px; }
+        .user-info small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.6; word-break: break-all; }
         .empty-note { text-align: center; color: var(--muted); padding: 18px 0; }
 
 
         /* ---- bottom nav (normal user app er moto) ---- */
-        .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; display: flex; background: rgba(11,14,26,.88); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid rgba(255,255,255,.1); padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); }
+        .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; display: flex; background: rgba(10,30,36,.88); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid rgba(255,255,255,.1); padding: 8px 6px calc(10px + env(safe-area-inset-bottom)); }
         .nav-btn { flex: 1; min-width: 0; background: none; border: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; font-size: 20px; padding: 6px 0; font-family: inherit; }
         .nav-btn label { font-size: 11px; font-weight: 700; }
         .nav-btn.active { color: var(--lime); }
@@ -210,7 +207,7 @@
         .item-ic {
             width: 40px; height: 40px; flex: none; border-radius: 12px;
             display: flex; align-items: center; justify-content: center; font-size: 20px;
-            background: linear-gradient(135deg, #2a3358, #141a36);
+            background: linear-gradient(135deg, #134e4a, #0e2a32);
         }
         .item-info { flex: 1; min-width: 0; }
         .item-info strong { font-size: 14.5px; display: block; word-break: break-word; }
@@ -269,21 +266,16 @@
                 <div class="card accent-gold">
                     <div class="card-head">
                         <div class="icon-badge">📚</div>
-                        <div><h4>নতুন বই যোগ করুন</h4><p class="card-hint">লাইব্রেরিতে বইয়ের লিংক যোগ করুন।</p></div>
+                        <div><h4>নতুন বই যোগ করুন</h4><p class="card-hint">ফাইল থেকে PDF দিয়ে বই যোগ করুন।</p></div>
                     </div>
                     <input type="text" id="book-title" placeholder="বইয়ের নাম (যেমন: এমপিথ্রি বাংলা)">
                     <input type="text" id="book-author" placeholder="লেখক বা প্রকাশনী">
-                    <input type="text" id="book-link" placeholder="বইয়ের PDF বা Google Drive লিংক">
-                    <button class="btn-gold" onclick="addBook()">বই যোগ করুন</button>
-                    <div style="border-top:1px solid rgba(255,255,255,.09); margin-top:16px; padding-top:14px;">
-                        <p style="font-size:13px; color:var(--muted); margin:0 0 4px;">অথবা ফাইল থেকে PDF দিয়ে বই যোগ করুন</p>
-                        <label class="file-picker" for="book-pdf-file" style="border-color:rgba(255,211,77,.55); background:rgba(255,211,77,.07);">📄 পিডিএফ ফাইল বেছে নিন</label>
-                        <input type="file" id="book-pdf-file" accept="application/pdf" class="hidden">
-                        <div class="file-name" id="book-pdf-file-name"></div>
-                        <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF — নাম আর লেখক উপরের ঘরেই লিখুন</p>
-                        <button class="btn-gold" onclick="uploadBookPdf()">📤 PDF ফাইল দিয়ে বই যোগ করুন</button>
-                        <div class="upload-status" id="book-pdf-status"></div>
-                    </div>
+                    <label class="file-picker" for="book-pdf-file" style="border-color:rgba(251,191,36,.55); background:rgba(251,191,36,.07);">📄 পিডিএফ ফাইল বেছে নিন</label>
+                    <input type="file" id="book-pdf-file" accept="application/pdf" class="hidden">
+                    <div class="file-name" id="book-pdf-file-name"></div>
+                    <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF — নাম আর লেখক উপরের ঘরেই লিখুন</p>
+                    <button class="btn-gold" onclick="uploadBookPdf()">📤 PDF ফাইল দিয়ে বই যোগ করুন</button>
+                    <div class="upload-status" id="book-pdf-status"></div>
                 </div>
                 <h4 class="list-title">📚 বইয়ের তালিকা</h4>
                 <p class="list-sub">লাইব্রেরিতে থাকা সব বই।</p>
@@ -315,41 +307,25 @@
                 <div class="card accent-cyan">
                     <div class="card-head">
                         <div class="icon-badge">📄</div>
-                        <div><h4>ডকুমেন্ট / সার্কুলার যোগ করুন</h4><p class="card-hint">লিংক দিয়ে সরকারি চাকরির ডকুমেন্ট যোগ করুন।</p></div>
+                        <div><h4>ডকুমেন্ট / সার্কুলার যোগ করুন</h4><p class="card-hint">ফাইল থেকে PDF দিয়ে ডকুমেন্ট যোগ করুন।</p></div>
                     </div>
                     <input type="text" id="admin-doc-title" placeholder="ডকুমেন্টের নাম">
-                    <input type="text" id="admin-doc-link" placeholder="PDF বা Drive লিংক">
-                    <button class="btn-cyan" onclick="addAdminDoc()">ডকুমেন্ট যোগ করুন</button>
-                    <div style="border-top:1px solid rgba(255,255,255,.09); margin-top:16px; padding-top:14px;">
-                        <p style="font-size:13px; color:var(--muted); margin:0 0 4px;">অথবা ফাইল থেকে PDF দিয়ে ডকুমেন্ট যোগ করুন</p>
-                        <label class="file-picker" for="doc-pdf-file" style="border-color:rgba(34,211,238,.55); background:rgba(34,211,238,.07);">📄 পিডিএফ ফাইল বেছে নিন</label>
-                        <input type="file" id="doc-pdf-file" accept="application/pdf" class="hidden">
-                        <div class="file-name" id="doc-pdf-file-name"></div>
-                        <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF — নাম উপরের ঘরেই লিখুন</p>
-                        <button class="btn-cyan" onclick="uploadDocPdf()">📤 PDF ফাইল দিয়ে ডকুমেন্ট যোগ করুন</button>
-                        <div class="upload-status" id="doc-pdf-status"></div>
-                    </div>
+                    <label class="file-picker" for="doc-pdf-file" style="border-color:rgba(45,212,191,.55); background:rgba(45,212,191,.07);">📄 পিডিএফ ফাইল বেছে নিন</label>
+                    <input type="file" id="doc-pdf-file" accept="application/pdf" class="hidden">
+                    <div class="file-name" id="doc-pdf-file-name"></div>
+                    <p class="max-note">সর্বোচ্চ ১০ MB, শুধু PDF — নাম উপরের ঘরেই লিখুন</p>
+                    <button class="btn-cyan" onclick="uploadDocPdf()">📤 PDF ফাইল দিয়ে ডকুমেন্ট যোগ করুন</button>
+                    <div class="upload-status" id="doc-pdf-status"></div>
                 </div>
                 <h4 class="list-title">📃 ডকুমেন্টের তালিকা</h4>
-                <p class="list-sub">লিংক দিয়ে যোগ করা ডকুমেন্ট।</p>
+                <p class="list-sub">যোগ করা ডকুমেন্ট।</p>
                 <div id="doc-list"></div>
             </div>
 
             <!-- USERS -->
             <div class="admin-section hidden" id="sec-users">
-                <div class="card accent-lime">
-                    <div class="card-head">
-                        <div class="icon-badge">➕</div>
-                        <div><h4>নতুন বন্ধু যুক্ত করুন</h4><p class="card-hint">বন্ধুর নাম, Gmail, মোবাইল আর পাসওয়ার্ড দিন।</p></div>
-                    </div>
-                    <input type="text" id="new-u-name" placeholder="বন্ধুর নাম">
-                    <input type="email" id="new-u-email" placeholder="Gmail ঠিকানা" inputmode="email">
-                    <input type="text" id="new-u-mobile" placeholder="মোবাইল নাম্বার">
-                    <input type="password" id="new-u-pass" placeholder="পাসওয়ার্ড">
-                    <button class="btn-lime" onclick="addNewUser()">বন্ধু অ্যাড করুন</button>
-                </div>
-                <h3 class="section-title">👥 বন্ধুদের তালিকা</h3>
-                <p class="section-sub">যেকোনো বন্ধুকে এখান থেকে রিমুভ করা যাবে।</p>
+                <h3 class="section-title" style="margin-top:6px;">👥 বন্ধুদের তালিকা</h3>
+                <p class="section-sub">সব বন্ধুর তথ্য — যেকোনো বন্ধুকে এখান থেকে রিমুভ করা যাবে।</p>
                 <div id="admin-user-list"></div>
             </div>
 
@@ -404,32 +380,6 @@
         if(!text) return;
         try { await api('/api/notices', 'POST', { text }); document.getElementById('admin-idea-text').value = ''; alert('সফলভাবে নোটিশ পোস্ট করা হয়েছে!'); loadAdminContent(); }
         catch(e) { alert(e.message); }
-    }
-
-    async function addBook() {
-        let title = document.getElementById('book-title').value.trim();
-        let author = document.getElementById('book-author').value.trim();
-        let link = document.getElementById('book-link').value.trim();
-        if(!title || !link) { alert('বইয়ের নাম ও লিংক দিন!'); return; }
-        try {
-            await api('/api/books', 'POST', { title, author, link });
-            document.getElementById('book-title').value = '';
-            document.getElementById('book-author').value = '';
-            document.getElementById('book-link').value = '';
-            alert('বই সফলভাবে লাইব্রেরিতে যুক্ত হয়েছে!'); loadAdminContent();
-        } catch(e) { alert(e.message); }
-    }
-
-    async function addAdminDoc() {
-        let title = document.getElementById('admin-doc-title').value.trim();
-        let link = document.getElementById('admin-doc-link').value.trim();
-        if(!title || !link) { alert('ডকুমেন্টের নাম ও লিংক দিন!'); return; }
-        try {
-            await api('/api/docs', 'POST', { title, link, addedBy: 'Admin' });
-            document.getElementById('admin-doc-title').value = '';
-            document.getElementById('admin-doc-link').value = '';
-            alert('ডকুমেন্ট সফলভাবে যুক্ত হয়েছে!'); loadAdminContent();
-        } catch(e) { alert(e.message); }
     }
 
     // PDF file picker: show chosen file name
@@ -560,23 +510,6 @@
         }
     }
 
-    async function addNewUser() {
-        let name = document.getElementById('new-u-name').value.trim();
-        let email = document.getElementById('new-u-email').value.trim();
-        let mobile = document.getElementById('new-u-mobile').value.trim();
-        let pass = document.getElementById('new-u-pass').value.trim();
-        if(!name || !email || !pass) { alert('নাম, Gmail আর পাসওয়ার্ড দিন!'); return; }
-        try {
-            await api('/api/register', 'POST', { name, email, mobile, pass });
-            document.getElementById('new-u-name').value = '';
-            document.getElementById('new-u-email').value = '';
-            document.getElementById('new-u-mobile').value = '';
-            document.getElementById('new-u-pass').value = '';
-            loadAdminUsers();
-            alert('নতুন বন্ধু সফলভাবে অ্যাড করা হয়েছে!');
-        } catch(e) { alert(e.message); }
-    }
-
     async function loadAdminUsers() {
         let d;
         try { d = await api('/api/admin/users'); } catch(e) { return; }
@@ -591,7 +524,9 @@
                     <div class="user-avatar">${initial}</div>
                     <div class="user-info">
                         <strong>${u.name}</strong>
-                        <small>${u.mobile} • মোট পড়া: ${mins} মিনিট (${u.studySeconds || 0} সেকেন্ড)</small>
+                        <small>✉️ ${u.email || '—'}</small>
+                        <small>📱 ${u.mobile || '—'}</small>
+                        <small>⏱️ মোট পড়া: ${mins} মিনিট (${u.studySeconds || 0} সেকেন্ড)</small>
                     </div>
                     <button class="btn-red btn-small" onclick="removeUser(${u.id})">রিমুভ</button>
                 </div>`;
