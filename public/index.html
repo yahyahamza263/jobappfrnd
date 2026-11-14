@@ -108,8 +108,6 @@ select option{background:#0e2a32;color:#f2f4ff}
 .doc-card h4,.book-card h4{margin:0 0 4px;font-size:16px}
 .doc-card small,.book-card small{color:#9aa0c3}
 .file-row{display:flex;gap:8px;align-items:center}
-.upload-prog{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:10px}
-.upload-prog i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#2dd4bf,#2dd4bf);border-radius:99px;transition:width .3s}
 .reader-box{border-left:4px solid #fb7185}
 .reader-box iframe{width:100%;height:520px;border:1px solid rgba(255,255,255,.14);border-radius:12px;margin-top:10px;background:#fff}
 .chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;margin-top:6px}
@@ -211,16 +209,7 @@ select option{background:#0e2a32;color:#f2f4ff}
   </div>
 
   <div class="user-sub-tab hidden" id="ustub-docs">
-    <h3 class="sect">📄 পিডিএফ পড়ার ঘর<small>ফাইল আপলোড করো — অ্যাপের ভেতরেই পড়ো</small></h3>
-    <div class="card" style="border-left:4px solid #2dd4bf">
-      <h4 style="margin:0">📤 পিডিএফ ফাইল আপলোড করো</h4>
-      <p class="muted tiny" style="margin:6px 0 0">ফোন থেকে সরাসরি PDF বেছে নাও — সবার কাছে পৌঁছে যাবে। সর্বোচ্চ ১০ MB।</p>
-      <input type="text" id="pdf-title" placeholder="পিডিএফের নাম (যেমন: বাংলা ব্যাকরণ নোট)">
-      <div class="file-row"><input type="file" id="pdf-file" accept="application/pdf"></div>
-      <div class="upload-prog hidden" id="upload-prog"><i id="upload-fill"></i></div>
-      <p class="tiny muted hidden" id="upload-status"></p>
-      <button class="btn blue" onclick="uploadPdf()">⬆️ আপলোড করো</button>
-    </div>
+    <h3 class="sect">📄 পিডিএফ পড়ার ঘর<small>📢 সব সরকারি ও বেসরকারি চাকরির সার্কুলার এখানে দেওয়া হবে</small></h3>
     <div id="pdf-reader-box" class="card reader-box hidden">
       <strong id="reader-title">পিডিএফ রিডার</strong>
       <button class="btn red sm" style="float:right;margin:0" onclick="closeReader()">বন্ধ করো ✖</button>
@@ -429,29 +418,6 @@ function updateTimeDisplay(){
   document.getElementById('stat-rank').innerText = r ? '#' + bn(r) : '#—';
   document.getElementById('p-rank').innerText = r ? '#' + bn(r) : '—';
   document.getElementById('me-rank-pill').innerText = r ? '🏆 #' + bn(r) : '🏆 নতুন';
-}
-async function uploadPdf(){
-  const title = document.getElementById('pdf-title').value.trim();
-  const fileInput = document.getElementById('pdf-file');
-  const file = fileInput.files[0];
-  if(!title){ toast('পিডিএফের নাম লিখো!'); return; }
-  if(!file){ toast('একটা PDF ফাইল বেছে নাও!'); return; }
-  if(file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')){ toast('শুধু PDF ফাইল আপলোড করা যায়!'); return; }
-  if(file.size > 10*1024*1024){ toast('ফাইল ১০ MB এর বেশি হতে পারবে না!'); return; }
-  const prog = document.getElementById('upload-prog'), fill = document.getElementById('upload-fill'), status = document.getElementById('upload-status');
-  prog.classList.remove('hidden'); status.classList.remove('hidden'); status.innerText = 'আপলোড হচ্ছে… ⏳';
-  fill.style.width = '40%';
-  try{
-    const fd = new FormData();
-    fd.append('title', title); fd.append('addedBy', currentUser.name); fd.append('file', file);
-    const r = await fetch('/api/pdfs', {method:'POST', body: fd});
-    const d = await r.json().catch(()=>({}));
-    if(!r.ok) throw new Error(d.error || 'আপলোড হয়নি!');
-    fill.style.width = '100%'; status.innerText = '✅ আপলোড সম্পূর্ণ!';
-    document.getElementById('pdf-title').value = ''; fileInput.value = '';
-    setTimeout(()=>{ prog.classList.add('hidden'); fill.style.width = '0%'; }, 1200);
-    loadAllData(); toast('পিডিএফ আপলোড হয়েছে! 🎉');
-  }catch(e){ status.innerText = '❌ ' + e.message; toast(e.message); }
 }
 function openPdfReader(title, link){
   let embedLink;
