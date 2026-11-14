@@ -122,6 +122,13 @@ function nowSec() { return Math.floor(Date.now() / 1000); }
 function genOtpCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
 function normalizeEmail(raw) { return String(raw || '').trim().toLowerCase(); }
 function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) && e.length <= 120; }
+// OTP te Bangla (০-৯) ba Arabic (٠-٩) digit likhleo cholbe — English digit e bodle neoa hoy
+function normalizeOtpDigits(s) {
+  return String(s || '')
+    .replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d))
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+    .replace(/[\s-]/g, '');
+}
 
 async function sendOtpEmail(to, code) {
   const provider = (process.env.EMAIL_PROVIDER || 'demo').toLowerCase();
@@ -198,7 +205,7 @@ async function verifyEmailOtp(rawEmail, code, purpose) {
     await db.execute({ sql: 'DELETE FROM otp_codes WHERE email = ? AND purpose = ?', args: [email, purpose] });
     const e = new Error('অনেকবার ভুল হয়েছে! নতুন OTP নাও।'); e.status = 429; throw e;
   }
-  if (String(code).trim() !== r.code) {
+  if (normalizeOtpDigits(code) !== r.code) {
     await db.execute({ sql: 'UPDATE otp_codes SET attempts = attempts + 1 WHERE email = ? AND purpose = ?', args: [email, purpose] });
     const e = new Error('ভুল OTP! আবার চেষ্টা করো।'); e.status = 400; throw e;
   }
