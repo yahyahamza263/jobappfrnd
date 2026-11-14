@@ -215,41 +215,58 @@ setInterval(async () => {
 app.get('/api/health', (req, res) => res.json({ ok: true, app: 'JobAppFrnd', db: process.env.TURSO_DATABASE_URL ? 'turso' : 'local' }));
 
 // ---- Auth: Gmail + OTP signup (Study Tracker er moto) ----
-// POST /api/auth/signup/request-otp { email } — Gmail e 6 sonkhar OTP jabe
+// POST /api/auth/signup/request-otp { email, mobile? } — Gmail e 6 sonkhar OTP jabe
 app.post('/api/auth/signup/request-otp', async (req, res) => {
   try {
     const email = normalizeEmail((req.body || {}).email);
     if (!validEmail(email)) return res.status(400).json({ error: 'সঠিক Gmail ঠিকানা দিন!' });
+    const mobile = String((req.body || {}).mobile || '').trim();
     const taken = await db.execute({ sql: 'SELECT id FROM users WHERE email = ?', args: [email] });
     if (taken.rows.length) return res.status(400).json({ error: 'এই Gmail দিয়ে একাউন্ট আছে! লগইন করো।' });
+    if (mobile) {
+      const takenM = await db.execute({ sql: 'SELECT id FROM users WHERE mobile = ?', args: [mobile] });
+      if (takenM.rows.length) return res.status(400).json({ error: 'এই নাম্বারে একাউন্ট আছে!' });
+    }
     const out = await requestEmailOtp(email, 'signup');
     res.json({ ok: true, email: out.email, delivered: out.delivered, ...(out.demo_code ? { demo: true, demo_code: out.demo_code } : {}) });
   } catch (e) { console.error(e); res.status(e.status || 500).json({ error: e.message || 'Server error' }); }
 });
 
-// POST /api/auth/signup/verify { email, code, name, pass } — OTP millei account hobe
+// POST /api/auth/signup/verify { email, code, name, pass, mobile? } — OTP millei account hobe
 app.post('/api/auth/signup/verify', async (req, res) => {
   try {
     const { name, pass } = req.body || {};
     if (!name || !String(name).trim()) return res.status(400).json({ error: 'নাম লিখুন!' });
     if (!pass || String(pass).length < 4) return res.status(400).json({ error: 'পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে!' });
+    const mobile = String((req.body || {}).mobile || '').trim() || null;
     const email = await verifyEmailOtp(req.body.email, req.body.code, 'signup');
     const taken = await db.execute({ sql: 'SELECT id FROM users WHERE email = ?', args: [email] });
     if (taken.rows.length) return res.status(400).json({ error: 'এই Gmail দিয়ে একাউন্ট আছে! লগইন করো।' });
-    const ins = await db.execute({ sql: 'INSERT INTO users (name, email, mobile, pass) VALUES (?, ?, NULL, ?)', args: [String(name).trim(), email, String(pass)] });
+    if (mobile) {
+      const takenM = await db.execute({ sql: 'SELECT id FROM users WHERE mobile = ?', args: [mobile] });
+      if (takenM.rows.length) return res.status(400).json({ error: 'এই নাম্বারে একাউন্ট আছে!' });
+    }
+    const ins = await db.execute({ sql: 'INSERT INTO users (name, email, mobile, pass) VALUES (?, ?, ?, ?)', args: [String(name).trim(), email, mobile, String(pass)] });
     const r = await db.execute({ sql: 'SELECT * FROM users WHERE id = ?', args: [Number(ins.lastInsertRowid)] });
     res.json({ ok: true, user: publicUser(r.rows[0]) });
   } catch (e) { console.error(e); res.status(e.status || 500).json({ error: e.message || 'Server error' }); }
 });
 
-// ---- Auth: user (admin er mobile diye add kora account o cholbe) ----
+// ---- Auth: admin theke bondhu add (Gmail diye login korbe tai email lagbe) ----
 app.post('/api/register', async (req, res) => {
   try {
-    const { name, mobile, pass } = req.body || {};
-    if (!name || !mobile || !pass) return res.status(400).json({ error: 'সবগুলো ঘর পূরণ করুন!' });
-    const existing = await db.execute({ sql: 'SELECT id FROM users WHERE mobile = ?', args: [String(mobile).trim()] });
-    if (existing.rows.length) return res.status(400).json({ error: 'এই নাম্বারে একাউন্ট আছে!' });
-    await db.execute({ sql: 'INSERT INTO users (name, email, mobile, pass) VALUES (?, NULL, ?, ?)', args: [String(name).trim(), String(mobile).trim(), String(pass)] });
+    const { name, email, mobile, pass } = req.body || {};
+    if (!name || !pass) return res.status(400).json({ error: 'সবগুলো ঘর পূরণ করুন!' });
+    const em = normalizeEmail(email || '');
+    if (!validEmail(em)) return res.status(400).json({ error: 'সঠিক Gmail ঠিকানা দিন!' });
+    const mo = String(mobile || '').trim() || null;
+    const existingE = await db.execute({ sql: 'SELECT id FROM users WHERE email = ?', args: [em] });
+    if (existingE.rows.length) return res.status(400).json({ error: 'এই Gmail দিয়ে একাউন্ট আছে!' });
+    if (mo) {
+      const existingM = await db.execute({ sql: 'SELECT id FROM users WHERE mobile = ?', args: [mo] });
+      if (existingM.rows.length) return res.status(400).json({ error: 'এই নাম্বারে একাউন্ট আছে!' });
+    }
+    await db.execute({ sql: 'INSERT INTO users (name, email, mobile, pass) VALUES (?, ?, ?, ?)', args: [String(name).trim(), em, mo, String(pass)] });
     res.json({ ok: true });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
