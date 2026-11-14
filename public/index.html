@@ -140,17 +140,18 @@ select option{background:#141a36;color:#f2f4ff}
     </div>
     <div class="card auth-card" id="login-box">
       <h2>স্বাগতম 👋</h2>
-      <p class="muted">Gmail বা মোবাইল নম্বর আর পাসওয়ার্ড দিয়ে লগইন করো।</p>
-      <input type="text" id="user-login-mobile" placeholder="Gmail বা মোবাইল নম্বর">
+      <p class="muted">Gmail আর পাসওয়ার্ড দিয়ে লগইন করো।</p>
+      <input type="email" id="user-login-mobile" placeholder="Gmail ঠিকানা" inputmode="email">
       <input type="password" id="user-login-pass" placeholder="পাসওয়ার্ড">
-      <button class="btn primary" onclick="userLogin()">লগইন 🚀</button>
+      <button class="btn primary" onclick="userLogin()">Login</button>
       <p class="tiny muted center" style="margin-top:14px">অ্যাকাউন্ট নেই? <span class="link" onclick="toggleAuth(true)">রেজিস্ট্রেশন করো</span></p>
     </div>
     <div class="card auth-card hidden" id="reg-box">
       <h2>নতুন অ্যাকাউন্ট ✨</h2>
-      <p class="muted">Gmail দিয়ে OTP ভেরিফাই করে অ্যাকাউন্ট খুলো।</p>
+      <p class="muted">নাম, Gmail আর ফোন নম্বর দিয়ে অ্যাকাউন্ট খুলো।</p>
       <input type="text" id="user-reg-name" placeholder="তোমার নাম">
       <input type="email" id="user-reg-email" placeholder="Gmail ঠিকানা" inputmode="email">
+      <input type="text" id="user-reg-mobile" placeholder="ফোন নম্বর" inputmode="tel">
       <div id="otp-step-1">
         <button class="btn primary" onclick="requestOtp()">📧 Gmail এ OTP পাঠাও</button>
       </div>
@@ -158,7 +159,7 @@ select option{background:#141a36;color:#f2f4ff}
         <p class="muted" style="margin:4px 0">OTP গেছে <b id="otp-sent-to">—</b> এ। মেইল চেক করো (Spam/Promotions ও দেখো)।</p>
         <input type="text" id="user-reg-otp" placeholder="৬ সংখ্যার OTP" inputmode="numeric" maxlength="6">
         <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড (কমপক্ষে ৪ অক্ষর)">
-        <button class="btn primary" onclick="userRegister()">OTP যাচাই করে অ্যাকাউন্ট তৈরি করো 🎉</button>
+        <button class="btn primary" onclick="userRegister()">Sign Up</button>
         <p class="tiny muted center" style="margin-top:12px">OTP আসেনি? <span class="link" onclick="requestOtp(true)">আবার পাঠাও</span></p>
       </div>
       <p class="tiny muted center" style="margin-top:14px">আগেই অ্যাকাউন্ট আছে? <span class="link" onclick="toggleAuth(false)">লগইন করো</span></p>
@@ -292,14 +293,18 @@ function toggleAuth(isReg){
   document.getElementById('seg-reg').classList.toggle('active', isReg);
 }
 let otpEmail = '';
+let otpMobile = '';
 async function requestOtp(){
   let name = document.getElementById('user-reg-name').value.trim();
   let email = document.getElementById('user-reg-email').value.trim();
+  let mobile = document.getElementById('user-reg-mobile').value.trim();
   if(!name){ toast('নাম লিখো!'); return; }
   if(!email || !email.includes('@')){ toast('সঠিক Gmail ঠিকানা দিন!'); return; }
+  if(!mobile){ toast('ফোন নম্বর দিন!'); return; }
   try{
-    await api('/api/auth/signup/request-otp','POST',{email});
+    await api('/api/auth/signup/request-otp','POST',{email, mobile});
     otpEmail = email;
+    otpMobile = mobile;
     document.getElementById('otp-sent-to').innerText = email;
     document.getElementById('otp-step-1').classList.add('hidden');
     document.getElementById('otp-step-2').classList.remove('hidden');
@@ -312,7 +317,7 @@ async function userRegister(){
   let pass = document.getElementById('user-reg-pass').value.trim();
   if(!name || !code || !pass){ toast('সবগুলো ঘর পূরণ করো!'); return; }
   try{
-    const d = await api('/api/auth/signup/verify','POST',{email: otpEmail, code, name, pass});
+    const d = await api('/api/auth/signup/verify','POST',{email: otpEmail, code, name, pass, mobile: otpMobile});
     currentUser = d.user;
     try{ localStorage.setItem('jobappfrnd_user', JSON.stringify({name: currentUser.name, email: currentUser.email, mobile: currentUser.mobile})); }catch(e){}
     toast('অ্যাকাউন্ট তৈরি হয়েছে! স্বাগতম 🎉');
@@ -327,7 +332,7 @@ async function userLogin(){
     currentUser = d.user;
     try{ localStorage.setItem('jobappfrnd_user', JSON.stringify({name: currentUser.name, email: currentUser.email, mobile: currentUser.mobile})); }catch(e){}
     showDashboard();
-  }catch(e){ toast('Gmail/মোবাইল বা পাসওয়ার্ড ভুল!'); }
+  }catch(e){ toast('Gmail বা পাসওয়ার্ড ভুল!'); }
 }
 function showDashboard(){
   document.getElementById('auth-section').classList.add('hidden');
