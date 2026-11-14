@@ -152,16 +152,12 @@ select option{background:#141a36;color:#f2f4ff}
       <input type="text" id="user-reg-name" placeholder="তোমার নাম">
       <input type="email" id="user-reg-email" placeholder="Gmail ঠিকানা" inputmode="email">
       <input type="text" id="user-reg-mobile" placeholder="ফোন নম্বর" inputmode="tel">
-      <div id="otp-step-1">
-        <button class="btn primary" onclick="requestOtp()">📧 Gmail এ OTP পাঠাও</button>
-      </div>
-      <div id="otp-step-2" class="hidden">
-        <p class="muted" style="margin:4px 0">OTP গেছে <b id="otp-sent-to">—</b> এ। মেইল চেক করো (Spam/Promotions ও দেখো)।</p>
-        <input type="text" id="user-reg-otp" placeholder="৬ সংখ্যার OTP" inputmode="numeric" maxlength="6">
-        <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড (কমপক্ষে ৪ অক্ষর)">
-        <button class="btn primary" onclick="userRegister()">Sign Up</button>
-        <p class="tiny muted center" style="margin-top:12px">OTP আসেনি? <span class="link" onclick="requestOtp(true)">আবার পাঠাও</span></p>
-      </div>
+      <button class="btn primary" onclick="requestOtp()">📧 Gmail এ OTP পাঠাও</button>
+      <p class="tiny muted center hidden" id="otp-sent-note" style="margin:8px 0 0">OTP গেছে <b id="otp-sent-to">—</b> এ। মেইল চেক করো (Spam/Promotions ও দেখো)।</p>
+      <input type="text" id="user-reg-otp" placeholder="৬ সংখ্যার OTP" inputmode="numeric" maxlength="6">
+      <input type="password" id="user-reg-pass" placeholder="পাসওয়ার্ড (কমপক্ষে ৪ অক্ষর)">
+      <button class="btn primary" onclick="userRegister()">Sign Up</button>
+      <p class="tiny muted center" style="margin-top:12px">OTP আসেনি? <span class="link" onclick="requestOtp(true)">আবার পাঠাও</span></p>
       <p class="tiny muted center" style="margin-top:14px">আগেই অ্যাকাউন্ট আছে? <span class="link" onclick="toggleAuth(false)">লগইন করো</span></p>
     </div>
   </div>
@@ -306,8 +302,7 @@ async function requestOtp(){
     otpEmail = email;
     otpMobile = mobile;
     document.getElementById('otp-sent-to').innerText = email;
-    document.getElementById('otp-step-1').classList.add('hidden');
-    document.getElementById('otp-step-2').classList.remove('hidden');
+    document.getElementById('otp-sent-note').classList.remove('hidden');
     toast('OTP পাঠানো হয়েছে! Gmail চেক করো 📧');
   }catch(e){ toast(e.message); }
 }
@@ -316,6 +311,7 @@ async function userRegister(){
   let code = document.getElementById('user-reg-otp').value.trim();
   let pass = document.getElementById('user-reg-pass').value.trim();
   if(!name || !code || !pass){ toast('সবগুলো ঘর পূরণ করো!'); return; }
+  if(!otpEmail){ toast('আগে "Gmail এ OTP পাঠাও" চাপো!'); return; }
   try{
     const d = await api('/api/auth/signup/verify','POST',{email: otpEmail, code, name, pass, mobile: otpMobile});
     currentUser = d.user;
