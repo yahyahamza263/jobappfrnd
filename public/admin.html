@@ -142,6 +142,21 @@
         .btn-red { background: linear-gradient(135deg, #fb7185, #e11d48); box-shadow: 0 6px 22px rgba(251,113,133,.35); }
         .btn-ghost { background: transparent; border: 1px solid var(--card-border); color: var(--text); }
         .btn-small { width: auto; padding: 7px 14px; font-size: 13px; margin-top: 8px; border-radius: 10px; }
+        .btn-green { background: linear-gradient(135deg, #34d399, #059669); box-shadow: 0 6px 22px rgba(52,211,153,.35); }
+        .user-actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
+        .user-actions .btn-small { margin-top: 0; }
+        .ban-badge { color: #fb7185; font-weight: 800; }
+        .appeal-box { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.35); border-radius: 10px; padding: 8px 10px; margin-top: 8px; font-size: 13px; }
+        .appeal-box p { margin: 2px 0; }
+        .appeal-box .reply-row { display: flex; gap: 6px; margin-top: 6px; }
+        .appeal-box input { flex: 1; min-width: 0; }
+        .dur-btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        .dur-btns button { flex: 1 1 28%; padding: 10px 4px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card); color: var(--text); font-weight: 700; font-size: 13px; }
+        .dur-btns button.sel { border-color: #fbbf24; background: rgba(251,191,36,.15); color: #fbbf24; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(3,8,10,.82); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px; }
+        .modal-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; padding: 20px; width: 100%; max-width: 380px; }
+        .modal-card h3 { margin: 0 0 6px; font-size: 18px; }
+        .modal-card p { margin: 4px 0; color: var(--muted); font-size: 14px; }
 
         /* ---- login ---- */
         .login-wrap { padding: 34px 4px 10px; text-align: center; animation: rise .5s ease both; }
@@ -329,12 +344,34 @@
             <!-- USERS -->
             <div class="admin-section hidden" id="sec-users">
                 <h3 class="section-title" style="margin-top:6px;">👥 বন্ধুদের তালিকা</h3>
-                <p class="section-sub">সব বন্ধুর তথ্য — যেকোনো বন্ধুকে এখান থেকে রিমুভ করা যাবে।</p>
+                <p class="section-sub">সব বন্ধুর তথ্য — যেকোনো বন্ধুকে এখান থেকে ব্যান বা রিমুভ করা যাবে।</p>
                 <div id="admin-user-list"></div>
             </div>
 
             <button class="btn-ghost logout-btn" onclick="adminLogout()">লগআউট</button>
             <p class="footer-note">JobAppFrnd অ্যাডমিন • সরকারি চাকরি প্রস্তুতি</p>
+        </div>
+    </div>
+</div>
+
+<!-- Ban modal — kotokkhon ban korbe -->
+<div id="ban-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <h3>🚫 <span id="ban-modal-name"></span> কে ব্যান করো</h3>
+        <p>কতক্ষণের জন্য ব্যান করবে?</p>
+        <div class="dur-btns" id="ban-dur-btns">
+            <button data-min="10" onclick="setBanDuration(10, this)">১০ মিনিট</button>
+            <button data-min="30" class="sel" onclick="setBanDuration(30, this)">৩০ মিনিট</button>
+            <button data-min="60" onclick="setBanDuration(60, this)">১ ঘণ্টা</button>
+            <button data-min="360" onclick="setBanDuration(360, this)">৬ ঘণ্টা</button>
+            <button data-min="1440" onclick="setBanDuration(1440, this)">২৪ ঘণ্টা</button>
+            <button data-min="10080" onclick="setBanDuration(10080, this)">৭ দিন</button>
+        </div>
+        <label style="font-size:13px;color:var(--muted)">অথবা নিজের মতো মিনিট লিখো:</label>
+        <input id="ban-custom-min" type="number" min="1" max="43200" placeholder="যেমন: 45" style="width:100%;margin-top:6px;">
+        <div style="display:flex;gap:8px;margin-top:14px;">
+            <button class="btn-gold" style="flex:1" onclick="confirmBan()">ব্যান করো 🚫</button>
+            <button class="btn-ghost" style="flex:1" onclick="closeBanModal()">বাতিল</button>
         </div>
     </div>
 </div>
@@ -486,11 +523,27 @@
         let d;
         try { d = await api('/api/admin/users'); } catch(e) { return; }
         let users = d.users || [];
+        let appeals = [];
+        try { let ar = await api('/api/admin/appeals'); appeals = ar.appeals || []; } catch(e) {}
+        let appealsByUser = {};
+        appeals.forEach(a => { (appealsByUser[a.user_id] = appealsByUser[a.user_id] || []).push(a); });
         let listDiv = document.getElementById('admin-user-list');
         listDiv.innerHTML = users.length ? '' : '<p class="empty-note">কোনো বন্ধু নেই।</p>';
         users.forEach((u) => {
             let mins = Math.floor((u.studySeconds || 0) / 60);
             let initial = (u.name || '?').trim().charAt(0);
+            let banned = u.bannedUntil && u.bannedUntil > Date.now();
+            let banBadge = banned ? `<small class="ban-badge">🚫 ব্যান — ${fmtDur(Math.ceil((u.bannedUntil - Date.now()) / 1000))} বাকি</small>` : '';
+            let apHtml = '';
+            (appealsByUser[u.id] || []).slice(0, 2).forEach(a => {
+                apHtml += '<div class="appeal-box"><p>💬 <b>আপিল:</b> ' + esc(a.message) + '</p>'
+                    + '<p>স্ট্যাটাস: ' + (a.status === 'reviewed' ? '✅ উত্তর দেওয়া হয়েছে' : '⏳ অপেক্ষায়') + '</p>'
+                    + (a.reply ? '<p>💬 <b>তোমার উত্তর:</b> ' + esc(a.reply) + '</p>' : '')
+                    + (a.status === 'pending'
+                        ? '<div class="reply-row"><input id="reply-' + a.id + '" placeholder="উত্তর লিখো..."><button class="btn-gold btn-small" onclick="replyAppeal(' + a.id + ')">উত্তর দাও</button></div>'
+                        : '')
+                    + '</div>';
+            });
             listDiv.innerHTML += `
                 <div class="user-row">
                     <div class="user-avatar">${initial}</div>
@@ -499,8 +552,15 @@
                         <small>✉️ ${u.email || '—'}</small>
                         <small>📱 ${u.mobile || '—'}</small>
                         <small>⏱️ মোট পড়া: ${mins} মিনিট (${u.studySeconds || 0} সেকেন্ড)</small>
+                        ${banBadge}
+                        ${apHtml}
                     </div>
-                    <button class="btn-red btn-small" onclick="removeUser(${u.id})">রিমুভ</button>
+                    <div class="user-actions">
+                        ${banned
+                            ? `<button class="btn-green btn-small" onclick="unbanUser(${u.id})">✅ আনব্যান</button>`
+                            : `<button class="btn-gold btn-small" onclick="openBanModal(${u.id}, '${esc(u.name)}')">🚫 ব্যান</button>`}
+                        <button class="btn-red btn-small" onclick="removeUser(${u.id})">রিমুভ</button>
+                    </div>
                 </div>`;
         });
         renderTracking(users);
@@ -617,6 +677,43 @@
         if(!confirm('এই বন্ধুকে রিমুভ করবেন?')) return;
         try { await api('/api/admin/users/' + id, 'DELETE'); loadAdminUsers(); alert('বন্ধু সফলভাবে রিমুভ করা হয়েছে!'); }
         catch(e) { alert(e.message); }
+    }
+
+    // ---- Ban: kotokkhon ban korbe seta admin thik korbe ----
+    let banTargetId = 0;
+    let banMinutes = 30;
+    function openBanModal(id, name){
+        banTargetId = id; banMinutes = 30;
+        document.getElementById('ban-modal-name').innerText = name || '';
+        document.getElementById('ban-custom-min').value = '';
+        document.querySelectorAll('#ban-dur-btns button').forEach(b=>b.classList.toggle('sel', b.dataset.min === '30'));
+        document.getElementById('ban-modal').classList.remove('hidden');
+    }
+    function closeBanModal(){ document.getElementById('ban-modal').classList.add('hidden'); }
+    function setBanDuration(mins, btn){
+        banMinutes = mins;
+        document.getElementById('ban-custom-min').value = '';
+        document.querySelectorAll('#ban-dur-btns button').forEach(b=>b.classList.remove('sel'));
+        if(btn) btn.classList.add('sel');
+    }
+    async function confirmBan(){
+        let custom = parseInt(document.getElementById('ban-custom-min').value, 10);
+        let mins = (!isNaN(custom) && custom > 0) ? custom : banMinutes;
+        if(!mins || mins <= 0 || mins > 43200){ alert('সঠিক সময় দিন! (১ মিনিট — ৩০ দিন)'); return; }
+        try{ await api('/api/admin/ban','POST',{userId: banTargetId, minutes: mins}); closeBanModal(); loadAdminUsers(); alert('ব্যান করা হয়েছে!'); }
+        catch(e){ alert(e.message); }
+    }
+    async function unbanUser(id){
+        if(!confirm('এই বন্ধুর ব্যান তুলে দেবেন?')) return;
+        try{ await api('/api/admin/unban','POST',{userId: id}); loadAdminUsers(); alert('ব্যান তুলে দেওয়া হয়েছে!'); }
+        catch(e){ alert(e.message); }
+    }
+    async function replyAppeal(appealId){
+        let inp = document.getElementById('reply-' + appealId);
+        let reply = inp ? inp.value.trim() : '';
+        if(!reply){ alert('উত্তর লিখো!'); return; }
+        try{ await api('/api/admin/appeal/reply','POST',{appealId, reply}); loadAdminUsers(); alert('উত্তর পাঠানো হয়েছে!'); }
+        catch(e){ alert(e.message); }
     }
 
     // Refresh korle logout hobe na — save kora admin session diye dashboard khulbe
