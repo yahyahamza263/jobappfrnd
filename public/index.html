@@ -534,7 +534,7 @@ function esc(s){ return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;').rep
 async function loadAllData(){
   let d;
   try{ d = await api('/api/data'); }catch(e){ return; }
-  allUsers = d.users || [];
+  allUsers = (d.users || []).filter(u => (u.studySeconds || 0) > 0);
   updateTimeDisplay();
   const top = allUsers.slice(0,3);
   const medals = ['🥇','🥈','🥉'], rings = ['ring-gold','ring-silver','ring-bronze'];
