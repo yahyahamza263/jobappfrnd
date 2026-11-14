@@ -355,7 +355,7 @@ function showDashboard(){
   maybeShowWelcome();
   checkNotices();
   if(pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(pollUpdates, 15000);
+  pollInterval = setInterval(pollUpdates, 5000);
 }
 function maybeShowWelcome(){
   try{ if(localStorage.getItem('jobappfrnd_welcomed')) return; }catch(e){ return; }
@@ -390,7 +390,7 @@ function closeNotice(){
   markNoticesSeen(noticeIds);
 }
 
-// ---- 15s por por: session check (account muche felle logout) + notun data/notice ----
+// ---- 5s por por: session check (account muche felle logout) + notun data/notice ----
 async function pollUpdates(){
   if(!currentUser) return;
   try{
