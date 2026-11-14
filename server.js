@@ -79,6 +79,7 @@ async function initDb() {
     attempts INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (email, purpose)
   )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
   await db.execute(`CREATE TABLE IF NOT EXISTS ban_appeals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -122,6 +123,12 @@ async function initDb() {
 function publicUser(row) {
   return { id: row.id, name: row.name, email: row.email || '', mobile: row.mobile || '', studySeconds: row.study_seconds, bannedUntil: row.banned_until || 0 };
 }
+async function getSetting(key, def) {
+  const r = await db.execute({ sql: 'SELECT value FROM settings WHERE key = ?', args: [key] });
+  return r.rows.length ? r.rows[0].value : def;
+}
+// PDF public kina (default: na — protteke shudhu nijer PDF dekhbe)
+async function pdfsPublic() { return (await getSetting('pdfs_public', '0')) === '1'; }
 function isBanned(row) { return row.banned_until && Number(row.banned_until) > Date.now(); }
 // Unban: ban khule deo + oi user er sob appeal auto muche deo (dujoner kach thekei)
 async function clearBan(userId) {
@@ -335,6 +342,8 @@ app.post('/api/admin/login', (req, res) => {
 // ---- Combined data for user app ----
 app.get('/api/data', async (req, res) => {
   try {
+    const pub = await pdfsPublic();
+    const viewer = String(req.query.viewer || '').trim();
     const [notices, users, docs, books, pdfs] = await Promise.all([
       db.execute('SELECT * FROM notices ORDER BY id DESC'),
       db.execute('SELECT id, name, email, mobile, study_seconds, banned_until FROM users ORDER BY study_seconds DESC'),
@@ -342,12 +351,16 @@ app.get('/api/data', async (req, res) => {
       db.execute('SELECT * FROM books ORDER BY id DESC'),
       db.execute('SELECT id, title, filename, size, added_by FROM pdf_files ORDER BY id DESC'),
     ]);
+    let pdfList = pdfs.rows.map(r => ({ id: r.id, title: r.title, filename: r.filename, size: r.size, addedBy: r.added_by }));
+    // Private mode: protteke shudhu nijer + Admin er PDF dekhbe; public hole sobai sobta dekhbe
+    if (!pub && viewer) pdfList = pdfList.filter(p => p.addedBy === viewer || p.addedBy === 'Admin');
     res.json({
       notices: notices.rows.map(r => r.text),
       users: users.rows.map(publicUser),
       docs: docs.rows.map(r => ({ id: r.id, title: r.title, link: r.link, addedBy: r.added_by })),
       books: books.rows.map(r => ({ id: r.id, title: r.title, author: r.author, link: r.link })),
-      pdfs: pdfs.rows.map(r => ({ id: r.id, title: r.title, filename: r.filename, size: r.size, addedBy: r.added_by })),
+      pdfs: pdfList,
+      pdfsPublic: pub,
     });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
@@ -424,9 +437,13 @@ app.post('/api/pdfs', (req, res) => {
 
 app.get('/api/pdfs/:id/file', async (req, res) => {
   try {
-    const r = await db.execute({ sql: 'SELECT filename, mime, data FROM pdf_files WHERE id = ?', args: [req.params.id] });
+    const r = await db.execute({ sql: 'SELECT filename, mime, data, added_by FROM pdf_files WHERE id = ?', args: [req.params.id] });
     if (!r.rows.length) return res.status(404).send('PDF পাওয়া যায়নি!');
     const row = r.rows[0];
+    // Private mode: shudhu nijer PDF + Admin er PDF khola jabe (direct link diyeo onner ta khulbe na)
+    const viewer = String(req.query.viewer || '').trim();
+    const pub = await pdfsPublic();
+    if (!pub && row.added_by !== 'Admin' && row.added_by !== viewer) return res.status(403).send('এই PDF দেখার অনুমতি নেই!');
     const buf = Buffer.from(row.data);
     res.setHeader('Content-Type', row.mime || 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename="' + String(row.filename || 'file.pdf').replace(/"/g, '') + '"');
@@ -496,6 +513,15 @@ app.post('/api/admin/unban', async (req, res) => {
     if (!id) return res.status(400).json({ error: 'Invalid user' });
     await clearBan(id);
     res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// ---- Admin: sobar PDF sobar kache khola/bondho ----
+app.post('/api/admin/pdfs-public', async (req, res) => {
+  try {
+    const pub = !!(req.body && req.body.public);
+    await db.execute({ sql: "INSERT INTO settings (key, value) VALUES ('pdfs_public', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value", args: [pub ? '1' : '0'] });
+    res.json({ ok: true, public: pub });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
 
