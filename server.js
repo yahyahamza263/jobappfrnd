@@ -69,6 +69,8 @@ async function initDb() {
     await db.execute('DROP TABLE users_old');
     console.log('Migrated users table: email column added');
   }
+  // Ban column: na thakle add koro (purono DB teo cholbe)
+  try { await db.execute('ALTER TABLE users ADD COLUMN banned_until INTEGER'); } catch (e) { /* agei ache */ }
   await db.execute(`CREATE TABLE IF NOT EXISTS otp_codes (
     email TEXT NOT NULL,
     purpose TEXT NOT NULL,
@@ -76,6 +78,14 @@ async function initDb() {
     expires_at INTEGER NOT NULL,
     attempts INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (email, purpose)
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS ban_appeals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    reply TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
   await db.execute(`CREATE TABLE IF NOT EXISTS notices (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -110,8 +120,9 @@ async function initDb() {
 }
 
 function publicUser(row) {
-  return { id: row.id, name: row.name, email: row.email || '', mobile: row.mobile || '', studySeconds: row.study_seconds };
+  return { id: row.id, name: row.name, email: row.email || '', mobile: row.mobile || '', studySeconds: row.study_seconds, bannedUntil: row.banned_until || 0 };
 }
+function isBanned(row) { return row.banned_until && Number(row.banned_until) > Date.now(); }
 
 // ---- Email OTP (Study Tracker er otp.js er moto, Brevo diye) ----
 const OTP_TTL = 10 * 60; // 10 minutes
@@ -288,6 +299,8 @@ app.post('/api/login', async (req, res) => {
     if (id.includes('@')) r = await db.execute({ sql: 'SELECT * FROM users WHERE email = ? AND pass = ?', args: [normalizeEmail(id), String(pass)] });
     else r = await db.execute({ sql: 'SELECT * FROM users WHERE mobile = ? AND pass = ?', args: [id, String(pass)] });
     if (!r.rows.length) return res.status(401).json({ error: 'Gmail/মোবাইল বা পাসওয়ার্ড ভুল!' });
+    if (isBanned(r.rows[0])) return res.status(403).json({ error: 'banned', banned_until: Number(r.rows[0].banned_until) });
+    if (r.rows[0].banned_until) await db.execute({ sql: 'UPDATE users SET banned_until = NULL WHERE id = ?', args: [r.rows[0].id] });
     res.json({ ok: true, user: publicUser(r.rows[0]) });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
@@ -302,6 +315,7 @@ app.get('/api/session', async (req, res) => {
     else if (mobile) r = await db.execute({ sql: 'SELECT * FROM users WHERE mobile = ?', args: [mobile] });
     else return res.status(400).json({ error: 'email/mobile needed' });
     if (!r.rows.length) return res.status(404).json({ error: 'User not found' });
+    if (r.rows[0].banned_until && !isBanned(r.rows[0])) await db.execute({ sql: 'UPDATE users SET banned_until = NULL WHERE id = ?', args: [r.rows[0].id] });
     res.json({ ok: true, user: publicUser(r.rows[0]) });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
@@ -318,7 +332,7 @@ app.get('/api/data', async (req, res) => {
   try {
     const [notices, users, docs, books, pdfs] = await Promise.all([
       db.execute('SELECT * FROM notices ORDER BY id DESC'),
-      db.execute('SELECT id, name, email, mobile, study_seconds FROM users ORDER BY study_seconds DESC'),
+      db.execute('SELECT id, name, email, mobile, study_seconds, banned_until FROM users ORDER BY study_seconds DESC'),
       db.execute('SELECT * FROM docs ORDER BY id DESC'),
       db.execute('SELECT * FROM books ORDER BY id DESC'),
       db.execute('SELECT id, title, filename, size, added_by FROM pdf_files ORDER BY id DESC'),
@@ -341,6 +355,10 @@ app.post('/api/study/add', async (req, res) => {
     const em = normalizeEmail(email || '');
     const mo = String(mobile || '').trim();
     if ((!em && !mo) || !secs || secs <= 0) return res.status(400).json({ error: 'Invalid' });
+    const chk = em
+      ? await db.execute({ sql: 'SELECT banned_until FROM users WHERE email = ?', args: [em] })
+      : await db.execute({ sql: 'SELECT banned_until FROM users WHERE mobile = ?', args: [mo] });
+    if (chk.rows.length && isBanned(chk.rows[0])) return res.status(403).json({ error: 'banned' });
     if (em) await db.execute({ sql: 'UPDATE users SET study_seconds = study_seconds + ? WHERE email = ?', args: [secs, em] });
     else await db.execute({ sql: 'UPDATE users SET study_seconds = study_seconds + ? WHERE mobile = ?', args: [secs, mo] });
     const r = em
@@ -443,7 +461,7 @@ app.delete('/api/pdfs/:id', async (req, res) => {
 // ---- Admin: users list / remove ----
 app.get('/api/admin/users', async (req, res) => {
   try {
-    const r = await db.execute('SELECT id, name, email, mobile, study_seconds FROM users ORDER BY id DESC');
+    const r = await db.execute('SELECT id, name, email, mobile, study_seconds, banned_until FROM users ORDER BY id DESC');
     res.json({ users: r.rows.map(publicUser) });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
@@ -451,6 +469,83 @@ app.get('/api/admin/users', async (req, res) => {
 app.delete('/api/admin/users/:id', async (req, res) => {
   try {
     await db.execute({ sql: 'DELETE FROM users WHERE id = ?', args: [req.params.id] });
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// ---- Admin: user ban / unban (banned_until = epoch ms) ----
+app.post('/api/admin/ban', async (req, res) => {
+  try {
+    const id = parseInt(req.body && req.body.userId, 10);
+    const mins = Number(req.body && req.body.minutes);
+    if (!id || !mins || mins <= 0 || mins > 43200) return res.status(400).json({ error: 'সঠিক সময় দিন!' });
+    const until = Date.now() + Math.round(mins * 60000);
+    await db.execute({ sql: 'UPDATE users SET banned_until = ? WHERE id = ?', args: [until, id] });
+    res.json({ ok: true, banned_until: until });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/admin/unban', async (req, res) => {
+  try {
+    const id = parseInt(req.body && req.body.userId, 10);
+    if (!id) return res.status(400).json({ error: 'Invalid user' });
+    await db.execute({ sql: 'UPDATE users SET banned_until = NULL WHERE id = ?', args: [id] });
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// ---- Ban appeal: user comment pathabe, admin reply dibe ----
+// User: ban thakle appeal pathao
+app.post('/api/appeal', async (req, res) => {
+  try {
+    const { email, mobile, message } = req.body || {};
+    const msg = String(message || '').trim();
+    if (!msg) return res.status(400).json({ error: 'মেসেজ লিখো!' });
+    if (msg.length > 500) return res.status(400).json({ error: 'মেসেজ বেশি বড়!' });
+    const em = normalizeEmail(email || '');
+    const mo = String(mobile || '').trim();
+    let r;
+    if (em) r = await db.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [em] });
+    else if (mo) r = await db.execute({ sql: 'SELECT * FROM users WHERE mobile = ?', args: [mo] });
+    else return res.status(400).json({ error: 'Invalid user' });
+    if (!r.rows.length) return res.status(404).json({ error: 'User not found' });
+    if (!isBanned(r.rows[0])) return res.status(400).json({ error: 'তুমি এখন ব্যান নও!' });
+    await db.execute({ sql: 'INSERT INTO ban_appeals (user_id, message) VALUES (?, ?)', args: [r.rows[0].id, msg] });
+    res.json({ ok: true });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// User: nijer appeal er status check (Checking button)
+app.get('/api/appeal/status', async (req, res) => {
+  try {
+    const em = normalizeEmail(req.query.email || '');
+    const mo = String(req.query.mobile || '').trim();
+    let r;
+    if (em) r = await db.execute({ sql: 'SELECT * FROM users WHERE email = ?', args: [em] });
+    else if (mo) r = await db.execute({ sql: 'SELECT * FROM users WHERE mobile = ?', args: [mo] });
+    else return res.status(400).json({ error: 'Invalid user' });
+    if (!r.rows.length) return res.status(404).json({ error: 'User not found' });
+    const a = await db.execute({ sql: 'SELECT id, message, status, reply, created_at FROM ban_appeals WHERE user_id = ? ORDER BY id DESC LIMIT 1', args: [r.rows[0].id] });
+    res.json({ ok: true, appeal: a.rows.length ? a.rows[0] : null });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// Admin: sob appeal dekho
+app.get('/api/admin/appeals', async (req, res) => {
+  try {
+    const r = await db.execute(`SELECT a.id, a.user_id, a.message, a.status, a.reply, a.created_at, u.name, u.email, u.mobile
+      FROM ban_appeals a JOIN users u ON u.id = a.user_id ORDER BY a.id DESC`);
+    res.json({ appeals: r.rows });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// Admin: appeal er reply dao
+app.post('/api/admin/appeal/reply', async (req, res) => {
+  try {
+    const id = parseInt(req.body && req.body.appealId, 10);
+    const reply = String((req.body && req.body.reply) || '').trim();
+    if (!id || !reply) return res.status(400).json({ error: 'উত্তর লিখো!' });
+    await db.execute({ sql: "UPDATE ban_appeals SET reply = ?, status = 'reviewed' WHERE id = ?", args: [reply, id] });
     res.json({ ok: true });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
