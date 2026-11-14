@@ -114,6 +114,12 @@ select option{background:#0e2a32;color:#f2f4ff}
 .modal-emoji{font-size:52px}
 .modal-card h3{margin:10px 0 6px;font-size:21px}
 .modal-card p{margin:0 0 18px;color:#9aa0c3;font-size:15px;line-height:1.6}
+#ban-overlay{z-index:9999;background:rgba(5,10,12,.97)}
+#ban-overlay .modal-card{border-color:rgba(251,113,133,.6)}
+.ban-timer{font-size:32px;font-weight:800;color:#fbbf24;margin:6px 0 2px;letter-spacing:1px}
+.ban-note{font-size:13px;color:#9aa0c3;margin:0 0 14px;line-height:1.6}
+#ban-appeal-form textarea{margin:10px 0}
+#ban-appeal-status p{margin:0 0 10px}
 @keyframes pop{from{opacity:0;transform:scale(.85) translateY(16px)}to{opacity:1;transform:none}}
 .reader-box iframe{width:100%;height:520px;border:1px solid rgba(255,255,255,.14);border-radius:12px;margin-top:10px;background:#fff}
 .chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;margin-top:6px}
@@ -268,6 +274,27 @@ select option{background:#0e2a32;color:#f2f4ff}
     <button class="btn primary" onclick="closeNotice()">ঠিক আছে 👍</button>
   </div>
 </div>
+<!-- Ban overlay — timer sesh na howa porjonto jabe na, kichu kora jabe na -->
+<div id="ban-overlay" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-emoji">⛔</div>
+    <h3>তোমাকে ব্যান করা হয়েছে</h3>
+    <p>এডমিন তোমাকে কিছু সময়ের জন্য ব্যান করেছে।</p>
+    <div id="ban-countdown" class="ban-timer">--</div>
+    <p class="ban-note">সময় শেষ হলে আবার অ্যাপ ব্যবহার করতে পারবে।</p>
+    <button class="btn primary" id="ban-contact-btn" onclick="toggleAppealForm()">📩 Contact Admin</button>
+    <div id="ban-appeal-form" class="hidden">
+      <textarea id="ban-appeal-text" rows="3" placeholder="এডমিনকে তোমার কথা লিখো..."></textarea>
+      <button class="btn primary" onclick="sendAppeal()">পাঠাও ✉️</button>
+    </div>
+    <div id="ban-appeal-status" class="hidden">
+      <p>⏳ তোমার মেসেজ পাঠানো হয়েছে।</p>
+      <p id="ban-appeal-reply" class="hidden" style="color:#34d399"></p>
+      <button class="btn primary" onclick="checkAppealStatus()">🔍 Checking</button>
+      <p id="ban-appeal-state" class="ban-note"></p>
+    </div>
+  </div>
+</div>
 <script>
 let currentUser = null;
 let timerInterval = null;
@@ -333,7 +360,16 @@ async function userLogin(){
   let id = document.getElementById('user-login-mobile').value.trim();
   let pass = document.getElementById('user-login-pass').value.trim();
   try{
-    const d = await api('/api/login','POST',{email: id, pass});
+    const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email: id, pass})});
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok){
+      if(d.banned_until && d.banned_until > Date.now()){
+        banIdentity = id.includes('@') ? {email: id, mobile: ''} : {email: '', mobile: id};
+        showBan(d.banned_until);
+        toast('⛔ তোমাকে ব্যান করা হয়েছে!');
+      } else toast('Gmail বা পাসওয়ার্ড ভুল!');
+      return;
+    }
     currentUser = d.user;
     try{ localStorage.setItem('jobappfrnd_user', JSON.stringify({name: currentUser.name, email: currentUser.email, mobile: currentUser.mobile})); }catch(e){}
     showDashboard();
@@ -354,6 +390,7 @@ function showDashboard(){
   resumeTimer();
   maybeShowWelcome();
   checkNotices();
+  checkBan(currentUser);
   if(pollInterval) clearInterval(pollInterval);
   pollInterval = setInterval(pollUpdates, 5000);
 }
@@ -372,6 +409,7 @@ function getSeenNotices(){ try{ return JSON.parse(localStorage.getItem('jobappfr
 function markNoticesSeen(ids){ try{ localStorage.setItem('jobappfrnd_seen_notices', JSON.stringify(ids)); }catch(e){} }
 async function checkNotices(){
   if(!currentUser) return;
+  if(!document.getElementById('ban-overlay').classList.contains('hidden')) return;
   if(!document.getElementById('welcome-modal').classList.contains('hidden')) return;
   if(!document.getElementById('notice-modal').classList.contains('hidden')) return;
   let d;
@@ -390,6 +428,91 @@ function closeNotice(){
   markNoticesSeen(noticeIds);
 }
 
+// ---- ban overlay: timer sesh na howa porjonto jabe na, kichu kora jabe na ----
+let banUntil = 0;
+let banTick = null;
+let banIdentity = { email: '', mobile: '' };
+let appealSent = false;
+function fmtBan(ms){
+  let s = Math.max(0, Math.ceil(ms / 1000));
+  let h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  let out = '';
+  if(h > 0) out += bn(h) + ' ঘণ্টা ';
+  if(m > 0 || h > 0) out += bn(m) + ' মিনিট ';
+  out += bn(sec) + ' সেকেন্ড';
+  return out;
+}
+function tickBan(){
+  let left = banUntil - Date.now();
+  if(left <= 0){
+    hideBan();
+    if(currentUser){ pollUpdates(); }
+    return;
+  }
+  document.getElementById('ban-countdown').innerText = fmtBan(left) + ' বাকি';
+}
+function showBan(until){
+  banUntil = until;
+  document.getElementById('ban-overlay').classList.remove('hidden');
+  tickBan();
+  if(!banTick) banTick = setInterval(tickBan, 1000);
+  if(!appealSent) checkAppealStatus(true);
+}
+function hideBan(){
+  banUntil = 0; appealSent = false;
+  document.getElementById('ban-overlay').classList.add('hidden');
+  document.getElementById('ban-appeal-form').classList.add('hidden');
+  document.getElementById('ban-appeal-status').classList.add('hidden');
+  document.getElementById('ban-contact-btn').classList.remove('hidden');
+  if(banTick){ clearInterval(banTick); banTick = null; }
+}
+function checkBan(u){
+  let until = (u && u.bannedUntil) || 0;
+  if(until && until > Date.now()){
+    if(banUntil !== until) showBan(until);
+  } else if(banUntil){
+    hideBan();
+  }
+}
+function toggleAppealForm(){
+  document.getElementById('ban-appeal-form').classList.toggle('hidden');
+}
+async function sendAppeal(){
+  let msg = document.getElementById('ban-appeal-text').value.trim();
+  if(!msg){ toast('মেসেজ লিখো!'); return; }
+  let em = (currentUser && currentUser.email) || banIdentity.email || '';
+  let mo = (currentUser && currentUser.mobile) || banIdentity.mobile || '';
+  try{
+    await api('/api/appeal','POST',{email: em, mobile: mo, message: msg});
+    appealSent = true;
+    document.getElementById('ban-appeal-form').classList.add('hidden');
+    document.getElementById('ban-contact-btn').classList.add('hidden');
+    document.getElementById('ban-appeal-status').classList.remove('hidden');
+    document.getElementById('ban-appeal-state').innerText = 'Checking চাপলে এডমিনের উত্তর দেখতে পারবে।';
+    toast('মেসেজ পাঠানো হয়েছে! ✉️');
+  }catch(e){ toast(e.message); }
+}
+async function checkAppealStatus(silent){
+  let em = (currentUser && currentUser.email) || banIdentity.email || '';
+  let mo = (currentUser && currentUser.mobile) || banIdentity.mobile || '';
+  if(!em && !mo) return;
+  let d;
+  try{ d = await api('/api/appeal/status?' + (em ? 'email=' + encodeURIComponent(em) : 'mobile=' + encodeURIComponent(mo))); }catch(e){ return; }
+  let a = d.appeal;
+  if(!a){ if(!silent) document.getElementById('ban-appeal-state').innerText = 'এখনো কোনো মেসেজ পাঠানো হয়নি।'; return; }
+  appealSent = true;
+  document.getElementById('ban-contact-btn').classList.add('hidden');
+  document.getElementById('ban-appeal-status').classList.remove('hidden');
+  if(a.reply){
+    let r = document.getElementById('ban-appeal-reply');
+    r.innerText = '💬 এডমিনের উত্তর: ' + a.reply;
+    r.classList.remove('hidden');
+    document.getElementById('ban-appeal-state').innerText = 'এডমিন তোমার মেসেজ দেখেছে।';
+  } else {
+    document.getElementById('ban-appeal-state').innerText = '⏳ এডমিন এখনো দেখেনি — পরে আবার Checking চাপো।';
+  }
+}
+
 // ---- 5s por por: session check (account muche felle logout) + notun data/notice ----
 async function pollUpdates(){
   if(!currentUser) return;
@@ -402,7 +525,7 @@ async function pollUpdates(){
       toast('তোমার অ্যাকাউন্টটি এডমিন মুছে ফেলেছে।');
       return;
     }
-    if(r.ok){ const d = await r.json(); currentUser = d.user; }
+    if(r.ok){ const d = await r.json(); currentUser = d.user; checkBan(currentUser); if(banUntil) return; }
   }catch(e){ /* network problem hole kichu korbo na — session thakbe */ }
   loadAllData();
   checkNotices();
@@ -414,6 +537,7 @@ document.addEventListener('visibilitychange', function(){
 });
 function userLogout(){
   currentUser = null;
+  hideBan();
   clearInterval(timerInterval);
   if(pollInterval){ clearInterval(pollInterval); pollInterval = null; }
   try{ localStorage.removeItem('jobappfrnd_user'); localStorage.removeItem('jobappfrnd_timer'); }catch(e){}
@@ -482,7 +606,7 @@ async function stopTimer(){
       updateTimeDisplay();
       toast('পড়ার সময় সেভ হয়েছে! 🎉');
       loadAllData();
-    }catch(e){ toast('সেভ হয়নি: ' + e.message); }
+    }catch(e){ toast(e.message === 'banned' ? 'ব্যান থাকায় সময় সেভ হয়নি।' : 'সেভ হয়নি: ' + e.message); }
   }
   secondsElapsed = 0;
   document.getElementById('timer-text').innerText = fmtClock(0);
