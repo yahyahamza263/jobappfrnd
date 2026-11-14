@@ -355,7 +355,7 @@ function showDashboard(){
   maybeShowWelcome();
   checkNotices();
   if(pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(pollUpdates, 30000);
+  pollInterval = setInterval(pollUpdates, 15000);
 }
 function maybeShowWelcome(){
   try{ if(localStorage.getItem('jobappfrnd_welcomed')) return; }catch(e){ return; }
@@ -390,7 +390,7 @@ function closeNotice(){
   markNoticesSeen(noticeIds);
 }
 
-// ---- 30s por por: session check (account muche felle logout) + notun data/notice ----
+// ---- 15s por por: session check (account muche felle logout) + notun data/notice ----
 async function pollUpdates(){
   if(!currentUser) return;
   try{
@@ -407,6 +407,11 @@ async function pollUpdates(){
   loadAllData();
   checkNotices();
 }
+
+// Tab e fire ashle ba onno tab theke fire ashle sathe sathe check koro — refresh lagbe na
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden && currentUser){ pollUpdates(); }
+});
 function userLogout(){
   currentUser = null;
   clearInterval(timerInterval);
@@ -423,6 +428,7 @@ function switchTab(tab, btn){
   btn.parentElement.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   loadAllData();
+  checkNotices();
 }
 function fmtClock(s){
   let h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
