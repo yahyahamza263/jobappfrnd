@@ -340,9 +340,10 @@
                 <div class="card accent-lime">
                     <div class="card-head">
                         <div class="icon-badge">➕</div>
-                        <div><h4>নতুন বন্ধু যুক্ত করুন</h4><p class="card-hint">বন্ধুর নাম, মোবাইল আর পাসওয়ার্ড দিন।</p></div>
+                        <div><h4>নতুন বন্ধু যুক্ত করুন</h4><p class="card-hint">বন্ধুর নাম, Gmail, মোবাইল আর পাসওয়ার্ড দিন।</p></div>
                     </div>
                     <input type="text" id="new-u-name" placeholder="বন্ধুর নাম">
+                    <input type="email" id="new-u-email" placeholder="Gmail ঠিকানা" inputmode="email">
                     <input type="text" id="new-u-mobile" placeholder="মোবাইল নাম্বার">
                     <input type="password" id="new-u-pass" placeholder="পাসওয়ার্ড">
                     <button class="btn-lime" onclick="addNewUser()">বন্ধু অ্যাড করুন</button>
@@ -561,12 +562,14 @@
 
     async function addNewUser() {
         let name = document.getElementById('new-u-name').value.trim();
+        let email = document.getElementById('new-u-email').value.trim();
         let mobile = document.getElementById('new-u-mobile').value.trim();
         let pass = document.getElementById('new-u-pass').value.trim();
-        if(!name || !mobile || !pass) { alert('সবগুলো ঘর পূরণ করুন!'); return; }
+        if(!name || !email || !pass) { alert('নাম, Gmail আর পাসওয়ার্ড দিন!'); return; }
         try {
-            await api('/api/register', 'POST', { name, mobile, pass });
+            await api('/api/register', 'POST', { name, email, mobile, pass });
             document.getElementById('new-u-name').value = '';
+            document.getElementById('new-u-email').value = '';
             document.getElementById('new-u-mobile').value = '';
             document.getElementById('new-u-pass').value = '';
             loadAdminUsers();
