@@ -123,6 +123,11 @@ function publicUser(row) {
   return { id: row.id, name: row.name, email: row.email || '', mobile: row.mobile || '', studySeconds: row.study_seconds, bannedUntil: row.banned_until || 0 };
 }
 function isBanned(row) { return row.banned_until && Number(row.banned_until) > Date.now(); }
+// Unban: ban khule deo + oi user er sob appeal auto muche deo (dujoner kach thekei)
+async function clearBan(userId) {
+  await db.execute({ sql: 'UPDATE users SET banned_until = NULL WHERE id = ?', args: [userId] });
+  await db.execute({ sql: 'DELETE FROM ban_appeals WHERE user_id = ?', args: [userId] });
+}
 
 // ---- Email OTP (Study Tracker er otp.js er moto, Brevo diye) ----
 const OTP_TTL = 10 * 60; // 10 minutes
@@ -300,7 +305,7 @@ app.post('/api/login', async (req, res) => {
     else r = await db.execute({ sql: 'SELECT * FROM users WHERE mobile = ? AND pass = ?', args: [id, String(pass)] });
     if (!r.rows.length) return res.status(401).json({ error: 'Gmail/মোবাইল বা পাসওয়ার্ড ভুল!' });
     if (isBanned(r.rows[0])) return res.status(403).json({ error: 'banned', banned_until: Number(r.rows[0].banned_until) });
-    if (r.rows[0].banned_until) await db.execute({ sql: 'UPDATE users SET banned_until = NULL WHERE id = ?', args: [r.rows[0].id] });
+    if (r.rows[0].banned_until) await clearBan(r.rows[0].id);
     res.json({ ok: true, user: publicUser(r.rows[0]) });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
@@ -315,7 +320,7 @@ app.get('/api/session', async (req, res) => {
     else if (mobile) r = await db.execute({ sql: 'SELECT * FROM users WHERE mobile = ?', args: [mobile] });
     else return res.status(400).json({ error: 'email/mobile needed' });
     if (!r.rows.length) return res.status(404).json({ error: 'User not found' });
-    if (r.rows[0].banned_until && !isBanned(r.rows[0])) await db.execute({ sql: 'UPDATE users SET banned_until = NULL WHERE id = ?', args: [r.rows[0].id] });
+    if (r.rows[0].banned_until && !isBanned(r.rows[0])) await clearBan(r.rows[0].id);
     res.json({ ok: true, user: publicUser(r.rows[0]) });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
@@ -489,7 +494,7 @@ app.post('/api/admin/unban', async (req, res) => {
   try {
     const id = parseInt(req.body && req.body.userId, 10);
     if (!id) return res.status(400).json({ error: 'Invalid user' });
-    await db.execute({ sql: 'UPDATE users SET banned_until = NULL WHERE id = ?', args: [id] });
+    await clearBan(id);
     res.json({ ok: true });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
