@@ -313,7 +313,7 @@ async function requestOtp(){
 }
 async function userRegister(){
   let name = document.getElementById('user-reg-name').value.trim();
-  let code = document.getElementById('user-reg-otp').value.trim();
+  let code = document.getElementById('user-reg-otp').value.trim().replace(/[০-৯]/g, d=>'০১২৩৪৫৬৭৮৯'.indexOf(d)).replace(/[٠-٩]/g, d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[\s-]/g, '');
   let pass = document.getElementById('user-reg-pass').value.trim();
   if(!name || !code || !pass){ toast('সবগুলো ঘর পূরণ করো!'); return; }
   if(!otpEmail){ toast('আগে "Send OTP" চাপো!'); return; }
