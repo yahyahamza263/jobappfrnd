@@ -60,8 +60,6 @@ select option{background:#0e2a32;color:#f2f4ff}
 .hero{border-radius:22px;padding:20px;margin:14px 0;background:linear-gradient(135deg,rgba(45,212,191,.35),rgba(251,113,133,.22),rgba(52,211,153,.18));border:1px solid rgba(45,212,191,.4);animation:rise .45s ease both}
 .hero h2{margin:0;font-size:21px}
 .hero p{margin:6px 0 0;color:#dbe1ff;font-size:14px;line-height:1.6}
-.notice{border-radius:14px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.6;background:linear-gradient(135deg,rgba(45,212,191,.2),rgba(45,212,191,.1));border:1px solid rgba(45,212,191,.4);animation:rise .4s ease both}
-.notice.empty{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.09);color:#9aa0c3}
 .sect{margin:20px 4px 8px;font-size:17px;font-weight:800}
 .sect small{display:block;font-size:12px;color:#9aa0c3;font-weight:600;margin-top:2px}
 .timer-card{text-align:center}
@@ -109,6 +107,14 @@ select option{background:#0e2a32;color:#f2f4ff}
 .doc-card small,.book-card small{color:#9aa0c3}
 .file-row{display:flex;gap:8px;align-items:center}
 .reader-box{border-left:4px solid #fb7185}
+/* ---- welcome popup (first visit only) ---- */
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(5,15,18,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-card{position:relative;background:linear-gradient(160deg,#0f2e33,#0a1e24);border:1px solid rgba(45,212,191,.45);border-radius:24px;padding:34px 24px 24px;text-align:center;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:pop .35s ease both}
+.modal-x{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#f2f4ff;font-size:16px;font-weight:800;cursor:pointer;padding:0;margin:0;line-height:1}
+.modal-emoji{font-size:52px}
+.modal-card h3{margin:10px 0 6px;font-size:21px}
+.modal-card p{margin:0 0 18px;color:#9aa0c3;font-size:15px;line-height:1.6}
+@keyframes pop{from{opacity:0;transform:scale(.85) translateY(16px)}to{opacity:1;transform:none}}
 .reader-box iframe{width:100%;height:520px;border:1px solid rgba(255,255,255,.14);border-radius:12px;margin-top:10px;background:#fff}
 .chip{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px;margin-top:6px}
 .chip.pdf{background:rgba(45,212,191,.16);color:#5eead4}
@@ -177,12 +183,6 @@ select option{background:#0e2a32;color:#f2f4ff}
   </header>
 
   <div class="user-sub-tab" id="ustub-home">
-    <div class="hero">
-      <h2>📢 এডমিনের নোটিশ</h2>
-      <p>নতুন সার্কুলার, আইডিয়া আর গুরুত্বপূর্ণ খবর এখানেই পাবে।</p>
-    </div>
-    <div id="user-notice-board"><div class="notice empty">কোনো নোটিশ নেই।</div></div>
-
     <h3 class="sect">⏱️ পড়ার টাইমার<small>পড়া শুরু করো — সময় জমবে, র‍্যাংক বাড়বে</small></h3>
     <div class="card timer-card">
       <div class="timer-ring">
@@ -248,6 +248,16 @@ select option{background:#0e2a32;color:#f2f4ff}
   <button class="nav-btn" onclick="switchTab('profile', this)"><span>👤</span><label>প্রোফাইল</label></button>
 </div>
 
+<!-- Welcome popup — prothombarer jonno ekbar i dekhabe -->
+<div id="welcome-modal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <button class="modal-x" onclick="closeWelcome()">✕</button>
+    <div class="modal-emoji">🎉</div>
+    <h3>এই অ্যাপসে আপনাকে স্বাগতম!</h3>
+    <p>সামনে আরো আপডেট আসছে। ❤️</p>
+    <button class="btn primary" onclick="closeWelcome()">চলো শুরু করি 🚀</button>
+  </div>
+</div>
 <script>
 let currentUser = null;
 let timerInterval = null;
@@ -331,6 +341,15 @@ function showDashboard(){
   updateTimeDisplay();
   loadAllData();
   resumeTimer();
+  maybeShowWelcome();
+}
+function maybeShowWelcome(){
+  try{ if(localStorage.getItem('jobappfrnd_welcomed')) return; }catch(e){ return; }
+  document.getElementById('welcome-modal').classList.remove('hidden');
+  try{ localStorage.setItem('jobappfrnd_welcomed','1'); }catch(e){}
+}
+function closeWelcome(){
+  document.getElementById('welcome-modal').classList.add('hidden');
 }
 function userLogout(){
   currentUser = null;
@@ -452,10 +471,6 @@ async function loadAllData(){
   let d;
   try{ d = await api('/api/data'); }catch(e){ return; }
   allUsers = d.users || [];
-  let notices = d.notices || [];
-  let board = document.getElementById('user-notice-board');
-  board.innerHTML = notices.length ? '' : '<div class="notice empty">কোনো নোটিশ নেই।</div>';
-  notices.forEach(n => board.innerHTML += '<div class="notice">📢 ' + esc(n) + '</div>');
   updateTimeDisplay();
   const top = allUsers.slice(0,3);
   const medals = ['🥇','🥈','🥉'], rings = ['ring-gold','ring-silver','ring-bronze'];
